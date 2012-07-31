@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="nl.handypages.trviewer"
+      android:versionCode="10"
+      android:versionName="1.0">
+    <uses-sdk android:minSdkVersion="8" />
+	<uses-permission android:name="android.permission.INTERNET" />
+
+	
+    <application 
+    	android:label="@string/app_name" 
+    	android:icon="@drawable/launcher_trv">
+        <activity android:name=".MainActivity"
+                  android:label="@string/app_name" android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name="PrefsActivitity" android:label="@string/menu_item_preferences"></activity>
+        <activity android:name=".ActionListActivity" android:label="@string/textViewPhoneTitle"></activity>
+        <activity android:name="ActionDetailActivity" android:label="@string/textViewActionDetails"></activity>
+        <activity android:name="EditListsActivity" android:label="@string/menu_item_editList"></activity>
+        <activity android:name="ThoughtActivity" android:label="@string/menu_item_thought"></activity>
+        <activity android:name=".ActionListFilterActivity" android:label="@string/menu_item_filterList"/>
+        <activity android:name=".ActionListSortActivity" android:label="@string/menu_item_sortList"></activity>
+
+		 <activity
+		      android:name="com.dropbox.client2.android.AuthActivity"
+		      android:launchMode="singleTask"
+		      android:configChanges="orientation|keyboard">
+		      <intent-filter>
+		        <!-- Change this to be db- followed by your app key -->
+		        <data android:scheme="db-0eaqdthbpmxv38n" />
+		        <action android:name="android.intent.action.VIEW" />
+		        <category android:name="android.intent.category.BROWSABLE"/>
+		        <category android:name="android.intent.category.DEFAULT" />
+		      </intent-filter>
+		 </activity>
+    </application>
+</manifest>

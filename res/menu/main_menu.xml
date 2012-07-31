@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <item 
+    	android:title="@string/menu_item_refresh" 
+    	android:id="@+id/refreshBtn" 
+    	android:icon="@drawable/ic_menu_refresh"/>
+    <item 
+    	android:title="@string/menu_item_editList" 
+    	android:id="@+id/editListBtn" 
+    	android:icon="@drawable/ic_menu_edit"/>
+    <item 
+    	android:title="@string/menu_item_preferences" 
+    	android:id="@+id/prefsBtn" 
+    	android:icon="@drawable/ic_menu_preferences"/>
+    <item 
+    	android:title="@string/menu_item_help" 
+    	android:id="@+id/helpBtn" 
+    	android:icon="@drawable/ic_menu_help"/>
+    <item 
+    	android:title="@string/menu_item_about" 
+    	android:id="@+id/aboutBtn" 
+    	android:icon="@drawable/ic_menu_info_details"/>
+   	<item 
+    	android:title="@string/menu_item_exit" 
+    	android:id="@+id/exitBtn" 
+    	android:icon="@drawable/ic_menu_close_clear_cancel"/>
+</menu>

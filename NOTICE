@@ -1,0 +1,6 @@
+This project is provided under APACHE 2.0 license.
+
+Other included licenses:
+- Dropbox.java contains Dropbox license, see file header.
+- Eula.java doesn't have a license. Donn Felker indicated 12th of June 2012 that the code can be used in any
+way that the project wants. See: http://blog.donnfelker.com/2011/02/17/android-a-simple-eula-for-your-android-apps/

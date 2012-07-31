@@ -1,0 +1,56 @@
+Prepare Android package:
+
+1. Test and check in to development branche of Git.
+
+2. Update AndroidManifest.xml, the following lines:
+	android:versionCode="8"
+   	android:versionName="1.0 Beta 5"
+   	android:debuggable="false"
+   	
+3. Update strings.xml, the following lines:
+	<string name="updates">
+	do not forget the \n at the each line and \n\n at the last.
+	
+4. Test
+- Check About screen and 'updates'.
+- Test on phone
+- Test on emulator with new image
+- Check for useless logging/debugging messages.
+
+5. Check in to development branch
+
+6. Check into master branche
+- Check out master branche
+- Right click master branche --> Merge --> development (it should fast-forward the changes of development in master)
+- Richt click master branche --> Add tag --> title has the form: v1.0-beta-5 + description has the form: Beta 6 changes: + changes
+as described in strings.xml
+
+7. Export
+- Right click project --> Export.
+
+Update website:
+1. Edit download page
+- Change text at bottom: version + copy/paste updates from strings.xml (make bulletted list + remove \n at the end).
+- Remove previous version
+- Upload new version (don't forget to push Upload button)
+- Provide description like: Action Anywhere Beta 5
+- Also update description in Menu Settings and submit
+
+2. Test download and install file
+- Have to uninstall development file before installing the one from website.
+
+3. Update news item + newsletter 
+- Copy text from previous release
+- Add Content --> Simple Newsletter
+- Title format: Beta 5 is available for download
+- Description: Paste text + replace bulleted update list with updates from from Download page (copy/paste)
+- Save
+- Send test email with announcement of new release (On Newsletter tab)
+- If Ok send to all.
+
+4. Set Git back to Development branch.
+
+Finished.
+
+
+

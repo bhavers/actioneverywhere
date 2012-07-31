@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+    <Spinner
+        android:id="@+id/spinnerTopic"
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"
+        android:layout_alignParentBottom="true"/>
+   
+    <LinearLayout 
+    	android:id="@+id/linearLayout1" 
+	    android:layout_height="fill_parent" 
+	    android:layout_width="fill_parent" 
+	    android:orientation="vertical"
+	    android:layout_above="@+id/spinnerTopic">
+	    <LinearLayout 
+	    	android:id="@+id/linearLayoutThoughtBtns" 
+	    	android:layout_width="fill_parent"
+	    	android:layout_height="125px"
+	    	android:layout_alignParentTop="true"
+	    	android:orientation="horizontal">
+	    	<Button 
+		       	android:id="@+id/thoughtVoice" 
+		       	android:text="@string/thought_voice" 
+		       	android:layout_height="match_parent" 
+		       	android:layout_width="0dp"
+		       	android:layout_weight="1"
+		       	android:drawableTop="@drawable/ic_btn_speak_now"
+
+		       	android:onClick="recordVoice">
+	    	</Button>
+	    	<Button 
+		       	android:id="@+id/thoughtSend" 
+		       	android:text="@string/thought_send" 
+		       	android:layout_height="match_parent" 
+		       	android:layout_width="0dp"
+		       	android:layout_weight="1"
+		       	android:drawableTop="@drawable/ic_menu_send"
+		       	android:onClick="send">
+	    	</Button>
+	    </LinearLayout>
+	    <LinearLayout 
+	    	android:id="@+id/linearLayoutThoughtText" 
+	    	android:layout_height="fill_parent" 
+	    	android:layout_width="fill_parent" 
+	    	android:orientation="vertical">
+	        <EditText 
+	        	android:layout_width="match_parent" 
+	        	android:layout_height="match_parent" 
+	        	android:gravity="top"
+	        	android:id="@+id/editTextThought" 
+	        	android:inputType="textMultiLine">
+	            <requestFocus></requestFocus>
+	        </EditText>
+	    	
+	    </LinearLayout>
+	</LinearLayout>
+   
+</RelativeLayout>

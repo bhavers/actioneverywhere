@@ -1,0 +1,526 @@
+/*******************************************************************************
+ * Copyright (c) 2012 Handypages.nl
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *******************************************************************************/
+package nl.handypages.trviewer;
+
+import java.io.File;
+import java.util.ArrayList;
+
+import nl.handypages.trviewer.dropbox.Dropbox;
+import nl.handypages.trviewer.dropbox.DropboxDownloader;
+import nl.handypages.trviewer.helpers.ActionHelper;
+import nl.handypages.trviewer.helpers.ActionListHelper;
+import nl.handypages.trviewer.helpers.ActorHelper;
+import nl.handypages.trviewer.helpers.ContextHelper;
+import nl.handypages.trviewer.helpers.Eula;
+import nl.handypages.trviewer.helpers.ProjectHelper;
+import nl.handypages.trviewer.helpers.TopicHelper;
+import nl.handypages.trviewer.parser.TRAction;
+import nl.handypages.trviewer.parser.TRActionList;
+import nl.handypages.trviewer.parser.TRActor;
+import nl.handypages.trviewer.parser.TRContext;
+import nl.handypages.trviewer.parser.TRParser;
+import nl.handypages.trviewer.parser.TRProject;
+import nl.handypages.trviewer.parser.TRTopic;
+import android.os.Handler;
+import android.os.Message;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.webkit.WebView;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
+import android.widget.AdapterView.OnItemClickListener;
+
+public class MainActivity extends Activity {
+	
+	public static final String TAG = "TRV_Main";
+	static final int PARSING_PROGRESS_DIALOG = 0;
+	static final int DOWNLOADING_PROGRESS_DIALOG = 1;
+	static final int ABOUT_DIALOG = 2;
+	static final int HELP_DIALOG = 3;
+	
+	public static final int PROGRESS_START = 0;
+	public static final int PROGRESS_CONTEXTS = 10;
+	public static final int PROGRESS_TOPICS = 20;
+	public static final int PROGRESS_PROJECTS = 30;
+	public static final int PROGRESS_ACTORS = 45;
+	public static final int PROGRESS_ACTIONS = 65;
+	public static final int PROGRESS_DB_WRITE = 80;
+	public static final int PROGRESS_ACTIONLISTS = 90;
+	public static final int PROGRESS_FINISH = 100;
+	public static final int PROGRESS_DROPBOXIOEXCEPTION = -10;
+	public static final int PROGRESS_IOEXCEPTION= -11;
+	public static final int PROGRESS_EXCEPTION = -12;
+	
+    private ListView lv1;
+	private TextView textViewMainRefreshTime;
+	// listActions, listContext. listActors and listTopics are populate by the TRParser thread.
+	public static ArrayList<TRAction> listActions = null;
+	public static ArrayList<TRContext> listContexts = null;
+	public static ArrayList<TRTopic> listTopics = null;
+	public static ArrayList<TRProject> listProjects = null;
+	public static ArrayList<TRActor> listActors = null;
+	public static ArrayList<TRActionList> listActionLists = null; 
+	public static boolean dropboxFileChanged = false;
+	 
+	public static String[] LISTACTIONSTATE = null;
+	SharedPreferences prefs;
+	private Boolean prefsUseDropbox = null;
+	//private String prefsFilname = null;
+	//private Date prefsFilelastModDate = null; // 20120218 Can be removed if prefsFilelastModDateStr works as expected.
+	private String prefsFilelastModDateStr = null; 
+	public static String prefsEmailForThoughts = null;
+		
+	private static ActionListHelper actionListHelper;
+	private static ActionHelper actionHelper;
+	public static ProjectHelper projectHelper;
+	private static ActorHelper actorHelper;
+	private static ContextHelper contextHelper;
+	private static TopicHelper topicHelper;
+	
+	private TRParser parsingProgressThread;
+	private DropboxDownloader dbDownloaderThread;
+    ProgressDialog parsingProgressDialog;
+    ProgressDialog downloadingProgressDialog;
+    AlertDialog helpDialog;
+    private Dialog aboutDialog;
+    //private AlertDialog eulaDialog;
+    private TextView tvHelpTitle;
+    private TextView tvHelpBody;
+
+    public Dropbox db;
+    
+	
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        synchronized (this) {
+        	new Eula(this).show();
+		}
+        setContentView(R.layout.main);
+        db = new Dropbox(this);
+        
+        actionListHelper = new ActionListHelper(this);
+        actionHelper = new ActionHelper(this);
+        projectHelper = new ProjectHelper(this);
+        actorHelper = new ActorHelper(this);
+        contextHelper = new ContextHelper(this);
+        topicHelper = new TopicHelper(this);
+        
+        textViewMainRefreshTime = (TextView) findViewById(R.id.textViewMainRefreshTime);
+        tvHelpTitle = (TextView) findViewById(R.id.textViewMainHelpTitle);
+        tvHelpBody = (TextView) findViewById(R.id.textViewMainHelp);
+        lv1 = (ListView)findViewById(R.id.listViewMain);
+        //ArrayList<String> actionListsToDisplay = getActionLists(getBaseContext());
+        
+        tvHelpTitle = (TextView) findViewById(R.id.textViewMainHelpTitle);
+        tvHelpBody = (TextView) findViewById(R.id.textViewMainHelp);
+        
+        /*Already done in onResume()
+         * if (actionListsToDisplay.size() == 0) {
+        	tvHelpTitle.setVisibility(View.VISIBLE);
+        	tvHelpBody.setVisibility(View.VISIBLE);
+        	tvHelpBody.setTextSize(12);
+	    } else {
+	    	tvHelpTitle.setVisibility(View.GONE);
+	    	tvHelpBody.setVisibility(View.GONE);
+	    }
+        
+        lv1.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, actionListsToDisplay));	*/
+		
+        lv1.setOnItemClickListener(new OnItemClickListener(){
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				if (listActions != null) {
+					Intent intent = new Intent(getApplicationContext(), ActionListActivity.class);
+	            	Bundle bundle = new Bundle();
+	            	bundle.putInt("actionlistPos",position);
+	            	ListView tmpLv = (ListView)parent;
+	            	String tmp = (String)tmpLv.getItemAtPosition(position);
+	            	bundle.putString("actionList", tmp);
+	            	//Log.i(TAG,"Item clicked: " + tmp);
+	            	
+	            	intent.putExtras(bundle);
+	            	startActivity(intent);
+				} else {
+					Toast.makeText(getApplicationContext(), "No actions available", Toast.LENGTH_LONG).show();
+				}
+		    }
+		});
+
+		setActionsFromDb();
+		
+
+	    // Action states are hard coded in TR; retrieve from Array in R.
+        LISTACTIONSTATE = getResources().getStringArray(R.array.action_status);
+
+
+    }
+    
+    /**
+     * Parses the downloaded the file and writes content to database. 
+     */
+    private void parseXMLtoDb() {
+    	//getPreferences(); // After downloading the file modification date has changed, which is read in getPreferences()
+    	if (db.getLocalActionPath() != "" && db.existsLocalFile()) {
+	        if (listActions == null) {
+	        	listActions = null;
+	        	listContexts = null;
+	        	listTopics = null;
+	        	listProjects = null;
+	        	listActors = null;
+	        	listActionLists = null;
+	        	showDialog(PARSING_PROGRESS_DIALOG);
+	        	parsingProgressThread.start();
+	        }
+	    }
+    }
+   
+    private void updateRefreshLabel() {
+    	if (listActions.size() > 0) {
+			//textViewMainRefreshTime.setText(prefsFilelastModDate.toLocaleString() + " - " + Integer.toString(listActions.size()) + " actions");
+    		textViewMainRefreshTime.setText(prefsFilelastModDateStr + "\n" + Integer.toString(listActions.size()) + " actions");
+    		lv1.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, getActionLists(getBaseContext())));
+		}
+    }
+    /*
+	 * Update the home screen (if no action lists have been created, show setup instructions)
+	 */
+    private void updateListGUI() {
+    	
+		//Log.i(MainActivity.TAG,"Number of lists: " + Integer.toString(lv1.getAdapter().getCount()));
+        if (lv1.getAdapter().getCount() == 0) {
+        	tvHelpTitle.setVisibility(View.VISIBLE);
+        	tvHelpBody.setVisibility(View.VISIBLE);
+        	tvHelpBody.setTextSize(12);
+	    } else {
+	    	tvHelpTitle.setVisibility(View.GONE);
+	    	tvHelpBody.setVisibility(View.GONE);
+	    }
+    }
+    
+    /*
+    public static ArrayList<String> getActionLists() {
+    	
+    	//Map<String,Integer> storedLists = (Map<String, Integer>) db; // all values stored in db
+    	ArrayList<String> displayLists = new ArrayList<String>(); // The ordered list for display
+    	return displayLists;
+    }*/
+    
+	public static ArrayList<String> getActionLists(Context ctx) {
+    	ArrayList<String> displayLists = new ArrayList<String>(); // empty, will be build in refreshLists()
+		listActionLists = actionListHelper.getActionListCustom(false); // first add lists from TR-app
+    	listActionLists.addAll(actionListHelper.getActionListCustom(true)); // than add custom lists (defined by user) at the bottom (if available). 
+    	
+    	// Now create list to display (only names of action lists instead of objects).
+    	for (int i = 0; i < listActionLists.size(); i++) {
+    		displayLists.add(listActionLists.get(i).getName());
+		} 
+    	
+    	//displayLists = actionListHelper.getActionListCustom(false); // first add lists from TR-app
+		//displayLists.addAll(actionListHelper.getActionListCustom(true)); // than add custom lists (defined by user) at the bottom (if available). 
+		//Log.i(TAG,"MainActivity.getActionLists(ctx): actionListHelper.close()");
+    	actionListHelper.close();
+		return displayLists;
+	}
+	/*
+	 * Reads Actions, Actors, Contexts and Topics from database and fills local variables.
+	 */
+	private void setActionsFromDb() {
+		Log.i(MainActivity.TAG,"Reading actions, actors, contexts and topics from db.");
+		listActions = null;
+    	listContexts = null;
+    	listTopics = null;
+    	listProjects = null;
+    	listActors = null;
+    	
+		listActions = actionHelper.getActions();
+		listProjects = projectHelper.getProjects();
+		listActors = actorHelper.getActors();
+		listContexts = contextHelper.getContexts();
+		listTopics = topicHelper.getTopics();
+		
+		getPreferences();
+		updateRefreshLabel();
+		
+	}
+	
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		/*
+		 *  Update the action list menu, because when EditListActivity have been accessed the user 
+		 *  might have changed the actions lists. Also reload dropbox because the user might have
+		 *  changed preferences.
+		 */
+		getPreferences();
+		db = new Dropbox(this); //
+		lv1.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, getActionLists(getBaseContext())));
+		if (dropboxFileChanged) {
+			dropboxFileChanged = false;
+			refreshActions();
+		}
+		updateListGUI();
+	} 
+
+	/**
+	 * @return
+	 */
+    protected Dialog onCreateDialog(int id) {
+    	switch(id) {
+        case PARSING_PROGRESS_DIALOG:
+            parsingProgressDialog = new ProgressDialog(MainActivity.this);
+            parsingProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            parsingProgressDialog.setMessage("Loading...");
+            return parsingProgressDialog;
+        case DOWNLOADING_PROGRESS_DIALOG:
+        	downloadingProgressDialog = new ProgressDialog(MainActivity.this);
+        	downloadingProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        	downloadingProgressDialog.setMessage(getString(R.string.dropbox_downloading));
+        	return downloadingProgressDialog;
+        case ABOUT_DIALOG:
+        	aboutDialog = new Dialog(this);
+            aboutDialog.setContentView(R.layout.about_dialog);
+            aboutDialog.setTitle(getString(R.string.menu_item_about) + " " + getString(R.string.app_name));
+
+            TextView textViewAboutAppVersion = (TextView) aboutDialog.findViewById(R.id.textViewAboutAppVersion);
+            PackageInfo pInfo;
+            String appVersion = new String("Unknown");
+			try {
+				pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+				appVersion = pInfo.versionName;
+			} catch (NameNotFoundException e) {
+				Log.i(TAG,"Could not find package version");
+			}
+            //version = pInfo.versionName;
+
+            textViewAboutAppVersion.setText(getString(R.string.about_version_label) + appVersion +"\n \n" + getString(R.string.app_description_short));
+            WebView webViewAbout = (WebView) aboutDialog.findViewById(R.id.webViewAbout);
+            webViewAbout.loadData(getString(R.string.acknowledgements), "text/html", null);
+            ImageView image = (ImageView) aboutDialog.findViewById(R.id.imageAbout);
+            image.setImageResource(R.drawable.launcher_trv);
+            return aboutDialog;
+        case HELP_DIALOG:
+	        helpDialog = new AlertDialog.Builder(this).create(); 
+		    helpDialog.setTitle(getString(R.string.help_title));
+		    helpDialog.setMessage(getString(R.string.help_text));
+		    helpDialog.setIcon(R.drawable.ic_menu_help);
+		    helpDialog.setButton("OK", new android.content.DialogInterface.OnClickListener() {  
+		      public void onClick(android.content.DialogInterface dialog, int which) {  
+		        return;  
+		    } });
+		    return helpDialog;
+        
+        default:
+            return null;
+        }
+    }
+
+    @Override
+    protected void onPrepareDialog(int id, Dialog dialog) {
+    	switch(id) {
+        	case PARSING_PROGRESS_DIALOG:
+        		parsingProgressDialog.setProgress(0);
+	            if (db.getLocalActionPath() != null) {
+	            	parsingProgressThread = new TRParser(getBaseContext(), db.getLocalActionPath(), 
+	            			db.getLocalActionListPath(), handler);
+	            }
+        	case DOWNLOADING_PROGRESS_DIALOG:
+	            if (db.getLocalActionPath() != null) {
+	            	dbDownloaderThread = new DropboxDownloader(db, db.getLocalActionPath(), downloadHandler);
+	            }
+		}
+    	
+    }
+
+    final Handler handler = new Handler() {
+    	@Override
+    	public void handleMessage(Message msg) {
+    		/*
+    		 * Handles the messages that are return by the parsing thread (TRParse) to update the ProgressDialog
+    		 */
+    		int total = msg.arg1;
+    		parsingProgressDialog.setProgress(total);
+    		
+    		if (total >= 100){
+    			removeDialog(PARSING_PROGRESS_DIALOG);
+    			getActionLists(getApplicationContext()); // update the action list display when parsing of lists has finished.
+    			setActionsFromDb();
+    			updateRefreshLabel();
+    			updateListGUI();
+    		}
+    	}
+    };
+    
+    final Handler downloadHandler = new Handler() {
+    	@Override
+    	public void handleMessage(Message msg) {
+    		/*
+    		 * Handles the messages that are return by the DropboxDownloader thread 
+    		 * Currently it is not updated from DropboxDownloader, maybe in the 
+    		 * future to present more details while downloading.
+    		 */
+    		int total = msg.arg1;
+    		
+    		if (total == PROGRESS_DROPBOXIOEXCEPTION) {
+    			dismissDialog(DOWNLOADING_PROGRESS_DIALOG);
+    			Toast.makeText(getApplicationContext(), getString(R.string.progress_dropboxexception), Toast.LENGTH_LONG).show();
+    		}
+    		if (total == PROGRESS_IOEXCEPTION) {
+    			dismissDialog(DOWNLOADING_PROGRESS_DIALOG);
+    			Toast.makeText(getApplicationContext(), getString(R.string.progress_ioexception), Toast.LENGTH_LONG).show();
+    		}
+    		if (total == PROGRESS_EXCEPTION) {
+    			dismissDialog(DOWNLOADING_PROGRESS_DIALOG);
+    			Toast.makeText(getApplicationContext(), getString(R.string.progress_exception), Toast.LENGTH_LONG).show();
+    		}
+    		if (total >= PROGRESS_FINISH){
+    			dismissDialog(DOWNLOADING_PROGRESS_DIALOG);
+    			//updateRefreshLabel();
+    			/*Intent intent = new Intent(MainActivity.this, MainActivity.class);
+    			finish();
+    	        startActivity(intent);*/
+    			parseXMLtoDb();
+    		}
+    	}
+    };
+    
+    protected void onDestroy() {
+    	super.onDestroy();
+    	//parsingProgressThread = null;
+    	listActions = null;
+    	listContexts = null;
+    	listTopics = null;
+    	listActionLists = null;
+    	listActors = null;
+    	Log.i(TAG,"MainActivity.onDestroy(): actionListHelper.close()");
+    	actionListHelper.close();
+    };
+    
+    private void getPreferences(){
+		prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+	    
+		prefsUseDropbox = prefs.getBoolean("checkBoxSyncWithDropbox", false);
+		
+		//prefsFilname =  prefs.getString("EditTextPrefsFileLocation", "");
+		//prefsFilname =  dropbox.getLocalPath();
+		//Log.i(TAG,"Using file: " + db.getLocalActionPath());
+		if (db.getLocalActionPath() != null) {
+			File file = null;
+			/*
+			 * File can not handle prefix file://
+			 */
+			if (db.getLocalActionPath().startsWith("file://")) {
+				db.storeLocalPath(db.getLocalActionPath().substring(6), db.getLocalActionListPath());
+				file = new File(db.getLocalActionPath());
+			} else {
+				file = new File(db.getLocalActionPath());
+			}
+		    if (file.exists()) {
+		    	//prefsFilelastModDate = new Date(file.lastModified());
+		    	prefsFilelastModDateStr = db.getFileLastModified();
+		    	//Log.i(TAG,"Last modified: " + prefsFilelastModDateStr);
+		    } else {
+		    	//Toast.makeText(getApplicationContext(), "File does not exist: " + prefsFilname, Toast.LENGTH_LONG).show();
+		    	// 20111119: Commented out setting prefsFilname to null because this doesn't work correctly on new
+		    	// devices, but this might be a problem later on.
+		    	//prefsFilname = null;
+		    }
+		}
+	    prefsEmailForThoughts = prefs.getString("EditTextPrefsEmail", "");
+    }
+	
+    @Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Create preferences menu
+	     MenuInflater inflater = getMenuInflater();
+	     inflater.inflate(R.menu.main_menu, menu);
+	     return true;
+	}
+	
+    @Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+	    // Handle item selection in the preferences menu
+	    switch (item.getItemId()) {
+	    case R.id.refreshBtn:
+	    	refreshActions();
+	        return true;
+	    case R.id.prefsBtn:
+	    	Intent settingsActivity = new Intent(getBaseContext(), PrefsActivitity.class);
+	    	startActivity(settingsActivity);
+	        return true;
+	    case R.id.editListBtn:
+	    	Intent editListActivity = new Intent(getBaseContext(), EditListsActivity.class);
+	    	startActivity(editListActivity);
+	        return true;
+	    case R.id.helpBtn:
+	    	showDialog(HELP_DIALOG);
+	    	TextView tvHelpDialog= (TextView) helpDialog.findViewById(android.R.id.message);
+	    	tvHelpDialog.setTextSize(12);
+	    	return true;
+	    case R.id.aboutBtn:
+	    	showDialog(ABOUT_DIALOG);
+	    	return true;
+	    case R.id.exitBtn:
+	    	this.finish();
+	        return true;
+	    default:
+	        return super.onOptionsItemSelected(item);
+	    }
+	}
+    public void refreshActions() {
+    	listActions = null;
+    	listContexts = null;
+    	listTopics = null;
+    	listActionLists = null;
+    	listActors = null;
+    	//dropbox = new Dropbox(this);
+        getPreferences();
+    	if (prefsUseDropbox == true && db.isLinked()) {
+    		showDialog(DOWNLOADING_PROGRESS_DIALOG);
+        	dbDownloaderThread.start();
+    	} else {
+    		Toast.makeText(getApplicationContext(), "Can not refresh actions, Dropbox preferences not set.", Toast.LENGTH_SHORT).show();
+    	}
+    }
+    public void newThought(View view) {
+    	if (prefsEmailForThoughts != "") {
+    		Intent intent = new Intent(getApplicationContext(), ThoughtActivity.class);
+    		startActivity(intent);
+    	} else {
+    		Toast.makeText(getApplicationContext(), ((TextView) view).getText() + ": set email in Preferences.", Toast.LENGTH_LONG).show();
+    	}
+    }
+
+}

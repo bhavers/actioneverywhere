@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Action Everywhere</string>
+    <string name="app_description_short">Action Everywhere is a Getting Things Done (GTD®) action list manager
+    for Thinking Rock.</string>
+    <string name="app_description">Action Everywhere is a Getting Things Done (GTD®) action list manager
+    for Thinking Rock (www.trgtd.com.au). It synchronizes your Thinking Rock data (.trx and ReviewActions.xml files) 
+    using Dropbox to your phone. The app starts directly with your action lists. You can also create
+    customized lists.
+    It has been designed to work with Thinking Rock 3.4.1; it might work with earlier versions.</string>
+    <string name="updates">
+	Updates in this version:\n
+	- Final 1.0 release.\n\n
+	</string>
+    
+    <string name="textViewPhoneTitle">Action list</string>
+    <string name="action_list_no_items">No actions.\nCheck filter settings (press Menu button).</string>
+    <string-array name="action_list_filters">
+    	<item>Context</item>
+    	<item>Topic</item>
+    	<item>Status</item>
+    	<item>Date is equal to or after</item>
+    	<item>Date is equal to or before</item>
+    </string-array>
+    <string-array name="action_status">
+        <item>Include all</item>
+        <item>ASAP</item>
+        <item>Inactive</item>
+        <item>Scheduled</item>
+        <item>Delegated</item>
+    </string-array>
+    <string-array name="action_status_id">
+        <item>actionStateAll</item>
+        <item>actionStateASAP</item>
+        <item>actionStateInactive</item>
+        <item>actionStateScheduled</item>
+        <item>actionStateDelegated</item>
+    </string-array>
+    <string-array name="action_after_description">
+        <item>Include all</item>
+        <item>Tomorrow</item>
+        <item>Today</item>
+        <item>Yesterday</item>
+        <item>One week ago</item>
+        <item>Two weeks ago</item>
+        <item>Three weeks ago</item>
+        <item>One month ago</item>
+    </string-array>
+    <string-array name="action_after_days">
+        <item>-999</item>
+        <item>1</item>
+        <item>0</item>
+        <item>-1</item>
+        <item>-7</item>
+        <item>-14</item>
+        <item>-21</item>
+        <item>-30</item>
+    </string-array>
+    <string-array name="action_before_description">
+        <item>Include all</item>
+        <item>Yesterday</item>
+        <item>Today</item>
+        <item>Tomorrow</item>
+        <item>One week</item>
+        <item>Two weeks</item>
+        <item>Three weeks</item>
+        <item>One month</item>
+    </string-array>
+    <string-array name="action_before_days">
+        <item>-999</item>
+        <item>-1</item>
+        <item>0</item>
+        <item>1</item>
+        <item>7</item>
+        <item>14</item>
+        <item>21</item>
+        <item>30</item>
+    </string-array>
+    <string name="prefs_title">Settings</string>
+    
+    <string name="menu_item_refresh">Refresh</string>
+    <string name="menu_item_preferences">Preferences</string>
+    <string name="menu_item_editList">Edit Lists</string>
+    <string name="menu_item_exit">Exit</string>
+    <string name="menu_item_filterList">Filter List</string>
+    <string name="menu_item_sortList">Sort List</string>
+    <string name="menu_item_about">About</string>
+    <string name="menu_item_help">Help</string>
+    
+    <string name="about_label">About</string>
+    <string name="about_version_label">Version:  </string>
+
+    <string name="main_new_thought_btn">New Thought</string>
+    <string name="main_refresh_btn">Refresh</string>
+    <string name="main_refresh_label">No file has been selected</string>
+	<string name="main_setup_title">Setup instructions</string>
+    <string name="main_setup_body">
+    Step 1: Link Action Everywhere to Dropbox (Menu button, Preferences)\nDropbox will create a new folder: \\Apps\\Action Everywhere.\n\n
+    Step 2: In Thinking Rock save your file (.trx) permanently in this new folder (File > Save as: My Dropbox\\Apps\\Action Everywhere)\nRestart Thinking Rock.\n\n
+   	Step 3: Select the file (in Preferences).\n\n
+   	Step 4: Return to the home screen. (Back button, the file will now be downloaded)\n\n
+   </string>
+   <string name="help_title">Help</string>
+   <string name="help_text">
+    Setup instructions:\n
+    Step 1: Link Action Everywhere to Dropbox (Menu button, Preferences)\nDropbox will create a new folder: \\Apps\\Action Everywhere.\n\n
+    Step 2: In Thinking Rock save your file (.trx) permanently in this new folder (File > Save as: My Dropbox\\Apps\\Action Everywhere)\nRestart Thinking Rock.\n\n
+   	Step 3: Select the file (in Preferences).\n\n
+   	Step 4: Return to the home screen. (Back button, the file will now be downloaded)\n\n
+   
+   Adding or editting lists:\n
+   There are two types of action lists:\n
+   1. Lists defined in Thinking Rock.\n
+   You can not make changes to these lists.\n
+   2. Lists defined in Action Everywhere.\n
+   You can customize these lists (Menu -> Edit Lists) and apply your own filters (select a list -> Menu -> Filter).\n\n
+   
+   Limited support for Thinking Rock filters:\n
+   Not all filters from Thinking Rock are supported in this app. This may lead to some inconsistencies.\n
+   - Filters for Context, Status, Topic and Action Date are supported.\n 
+   - Special filters like "Exclude if Null" are not supported.\n
+   After applying changes to filters and lists in Thinking Rock, restart Thinking Rock for the changes to be saved and synced.\n\n   
+   
+   Submitting new thoughts:\n
+   You can configure Thinking Rock with an email address to receive new thoughts (Tools -> Options
+   Miscellaneous -> Email). Set this email in Preferences and you can send new thoughts from Action Everywhere.\n\n
+   
+   Sorting of lists:\n
+   The order in which actions in a list are sorted is pre-determined and can not be changed. The order is:\n
+   - Before today\n
+   - Today\n
+   - Every action without a date\n
+   - Future actions\n\n
+  
+   </string>
+    <string name="prefs_cat_files">Files &amp; Synchronization</string>
+    <string name="prefs_sync_with_dropbox">Dropbox</string>
+    <string name="prefs_sync_with_dropbox_summary">Click here to use Dropbox to download your Thinking Rock file</string>
+    <string name="prefs_dropbox_settings">Dropbox Settings</string>
+    <string name="prefs_dropbox_settings_summary">Set up Dropbox syncing.</string>
+    <string name="prefs_dropbox_login_loggedin">Unlink from Dropbox</string>
+    <string name="prefs_dropbox_login_not_loggedin">Login to Dropbox</string>
+    <string name="prefs_dropbox_login_summary_loggedin">Your devices is linked with Dropbox.</string>
+    <string name="prefs_dropbox_login_summary_not_loggedin">Click here to login to Dropbox.</string>
+    <string name="prefs_dropbox_remote_file">Select Dropbox File</string>
+    <string name="prefs_dropbox_remote_file_summary">Click here to select your Thinking Rock file (this can take 30 secs, please wait).</string>
+	<string name="prefs_cat_thoughts">Thoughts</string>    
+    <string name="prefs_email">Email thoughts</string>
+    <string name="prefs_email_summary">Email address to send thoughts to (configure Thinking Rock to retrieve these emails)</string>
+    
+    <string name="prefs_filters">Filters</string>
+    <string name="prefs_filter_context_enable">Context</string>
+    <string name="prefs_filter_context">Select contexts</string>
+    <string name="prefs_filter_context_summary">None selected</string>
+    <string name="prefs_filter_topic_enable">Topic</string>
+    <string name="prefs_filter_topic">Select topics</string>
+    <string name="prefs_filter_topic_summary">None selected</string>
+    <string name="prefs_filter_status_enable">Status</string>
+    <string name="prefs_filter_status">Select status</string>
+    <string name="prefs_filter_status_summary">None selected</string>
+    <string name="prefs_filter_date_before_enable">Action date is before</string>
+    <string name="prefs_filter_date_before">Selection Action date before</string>
+    <string name="prefs_filter_date_before_summary">Nothing selected</string>
+    <string name="prefs_filter_date_after_enable">Action date is after</string>
+    <string name="prefs_filter_date_after">Select action date after</string>
+    <string name="prefs_filter_date_after_summary">Nothing selected</string>
+    
+    <string name="progress_dropboxexception">Refresh cancelled!\nCan not download file from Dropbox, do you have network connectivity?</string>
+    <string name="progress_ioexception">Refresh cancelled!\nCan not read or write file from Dropbox on your device, do you have enough space available?</string>
+    <string name="progress_exception">Refresh cancelled!\nAn error has occurred while trying to download a file from Dropbox </string>
+    
+    <string name="dropbox_base_path">/App/Action Everywhere</string>
+    <string name="dropbox_downloading">Downloading file from Dropbox</string>
+    <string name="dropbox_Remote_Path_Label">Dropbox Remote File (eg. /actions/tr.trx)</string>
+    <string name="dropbox_Local_Path_Label">Local File (eg. /mnt/sdcard/actions/tr.trx)</string>   
+    <string name="dropbox_Login_Label">Email</string>
+    <string name="dropbox_Password_Label">Password</string>
+    <string name="dropbox_LoggedIn_Label">Your device is linked with Dropbox.\n</string>
+    <string name="dropbox_Login_Btn_Logout">Unlink from Dropbox</string>
+    <string name="dropbox_Login_Btn_Login">Log In to Dropbox</string>
+    <string name="dropbox_save_paths_btn">Save</string>
+    <string name="dropbox_validation_email_error">Dropbox login error: invalid e-mail, authentication aborted.</string>
+    <string name="dropbox_validation_password_error">Dropbox login error: password too short, authentication aborted.</string>
+    <string name="dropbox_authenticate_network_error">Could not authenticate with Dropbox; Do you have a network connection?</string>
+    <string name="dropbox_authenticate_error">Could not authenticate with Dropbox; Do you have a network connection? Are email/password ok?</string>
+    <string name="dropbox_download_error">There was a problem downloading the file from Dropbox or when saving it on the device.</string>
+    <string name="dropbox_auth_ok_title">Authentication successful</string>
+    <string name="dropbox_auth_ok_body">
+    You have successfully linked your device to Dropbox. A special folder has been created by Dropbox: My Dropbox\\app\\Action Everywhere\n\n
+Save your Thinking Rock file (.trx) in this folder, restart Thinking Rock and select it for synchronization with your device (Select Dropbox File).\n 
+   </string>
+    <string name="error_file_not_found">File not found; make sure file is available at the location as set in Preferences.</string>
+    <string name="error_file_not_supplied">Please provide the path to the .trx file in Preferences.</string>
+    <string name="error_file_not_correct">The file could not be read, provide a valid file.</string>
+    <string name="edit_lists_introduction">Available lists</string>
+    <string name="edit_lists_add_list">Enter name of the new list</string>
+	<string name="edit_lists_down_btn">Move down</string>
+	<string name="edit_lists_up_btn">Move up</string>
+    <string name="edit_lists_add_btn">Add</string>
+    <string name="edit_lists_remove_btn">Remove</string>
+    
+    <string name="filter_list_header">Select the items to include in this list</string>
+    
+    <string name="sort_list_header">Reorder the fields below to order your list.</string>
+    
+    <string name="menu_item_thought">Collect thought</string>
+    <string name="thought_voice">Voice</string>
+    <string name="thought_send">Send</string>
+    
+    <string name="textViewActionDetails">Action Details</string>
+    <string name="textViewActionDetailsNotes">Notes</string>
+    <string name="webViewActionDetailsEmpty">No notes provided.</string>
+    
+    <string name="acknowledgements">
+    &lt;b>Acknowledgements:&lt;/b>&lt;br/>
+    &lt;ul>
+    	&lt;li>&lt;a href="http://www.trgtd.com.au/">Avente Pty Ltd&lt;/a> for their great application Thinking Rock&lt;/li>
+    	&lt;li>&lt;a href="http://www.davidco.com/">David Allen Company&lt;/a> for Getting Thinks Done &lt;/li>
+	    &lt;li>&lt;a href="http://www.dropbox.com">Dropbox&lt;/a> for their service, API and sample code&lt;/li>
+	    &lt;li>Donn Felker for his &lt;a href="http://blog.donnfelker.com/2011/02/17/android-a-simple-eula-for-your-android-apps/">Eula popup sample code&lt;/a>&lt;/li>
+    &lt;/ul>
+    </string>
+
+ <string name="apache2_0full">
+This application is released under the Apache 2.0 license below.\n\n  
+Apache License\n
+Version 2.0, January 2004\n
+http://www.apache.org/licenses/\n\n
+
+TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n\n
+
+1. Definitions.\n\n
+
+"License" shall mean the terms and conditions for use, reproduction, and distribution as defined by Sections 1 through 9 of this document.\n\n
+
+"Licensor" shall mean the copyright owner or entity authorized by the copyright owner that is granting the License.\n\n
+
+"Legal Entity" shall mean the union of the acting entity and all other entities that control, are controlled by, or are under common control with that entity. For the purposes of this definition, "control" means (i) the power, direct or indirect, to cause the direction or management of such entity, whether by contract or otherwise, or (ii) ownership of fifty percent (50%) or more of the outstanding shares, or (iii) beneficial ownership of such entity.\n\n
+
+"You" (or "Your") shall mean an individual or Legal Entity exercising permissions granted by this License.\n\n
+
+"Source" form shall mean the preferred form for making modifications, including but not limited to software source code, documentation source, and configuration files.\n\n
+
+"Object" form shall mean any form resulting from mechanical transformation or translation of a Source form, including but not limited to compiled object code, generated documentation, and conversions to other media types.\n\n
+
+"Work" shall mean the work of authorship, whether in Source or Object form, made available under the License, as indicated by a copyright notice that is included in or attached to the work (an example is provided in the Appendix below).\n\n
+
+"Derivative Works" shall mean any work, whether in Source or Object form, that is based on (or derived from) the Work and for which the editorial revisions, annotations, elaborations, or other modifications represent, as a whole, an original work of authorship. For the purposes of this License, Derivative Works shall not include works that remain separable from, or merely link (or bind by name) to the interfaces of, the Work and Derivative Works thereof.\n\n
+
+"Contribution" shall mean any work of authorship, including the original version of the Work and any modifications or additions to that Work or Derivative Works thereof, that is intentionally submitted to Licensor for inclusion in the Work by the copyright owner or by an individual or Legal Entity authorized to submit on behalf of the copyright owner. For the purposes of this definition, "submitted" means any form of electronic, verbal, or written communication sent to the Licensor or its representatives, including but not limited to communication on electronic mailing lists, source code control systems, and issue tracking systems that are managed by, or on behalf of, the Licensor for the purpose of discussing and improving the Work, but excluding communication that is conspicuously marked or otherwise designated in writing by the copyright owner as "Not a Contribution."\n\n
+
+"Contributor" shall mean Licensor and any individual or Legal Entity on behalf of whom a Contribution has been received by Licensor and subsequently incorporated within the Work.\n\n
+
+2. Grant of Copyright License.\n\n
+
+Subject to the terms and conditions of this License, each Contributor hereby grants to You a perpetual, worldwide, non-exclusive, no-charge, royalty-free, irrevocable copyright license to reproduce, prepare Derivative Works of, publicly display, publicly perform, sublicense, and distribute the Work and such Derivative Works in Source or Object form.\n\n
+
+3. Grant of Patent License.\n\n
+
+Subject to the terms and conditions of this License, each Contributor hereby grants to You a perpetual, worldwide, non-exclusive, no-charge, royalty-free, irrevocable (except as stated in this section) patent license to make, have made, use, offer to sell, sell, import, and otherwise transfer the Work, where such license applies only to those patent claims licensable by such Contributor that are necessarily infringed by their Contribution(s) alone or by combination of their Contribution(s) with the Work to which such Contribution(s) was submitted. If You institute patent litigation against any entity (including a cross-claim or counterclaim in a lawsuit) alleging that the Work or a Contribution incorporated within the Work constitutes direct or contributory patent infringement, then any patent licenses granted to You under this License for that Work shall terminate as of the date such litigation is filed.\n\n
+
+4. Redistribution.\n\n
+
+You may reproduce and distribute copies of the Work or Derivative Works thereof in any medium, with or without modifications, and in Source or Object form, provided that You meet the following conditions:\n\n
+
+    You must give any other recipients of the Work or Derivative Works a copy of this License; and\n
+    You must cause any modified files to carry prominent notices stating that You changed the files; and\n
+    You must retain, in the Source form of any Derivative Works that You distribute, all copyright, patent, trademark, and attribution notices from the Source form of the Work, excluding those notices that do not pertain to any part of the Derivative Works; and\n
+    If the Work includes a "NOTICE" text file as part of its distribution, then any Derivative Works that You distribute must include a readable copy of the attribution notices contained within such NOTICE file, excluding those notices that do not pertain to any part of the Derivative Works, in at least one of the following places: within a NOTICE text file distributed as part of the Derivative Works; within the Source form or documentation, if provided along with the Derivative Works; or, within a display generated by the Derivative Works, if and wherever such third-party notices normally appear. The contents of the NOTICE file are for informational purposes only and do not modify the License. You may add Your own attribution notices within Derivative Works that You distribute, alongside or as an addendum to the NOTICE text from the Work, provided that such additional attribution notices cannot be construed as modifying the License.\n\n
+
+You may add Your own copyright statement to Your modifications and may provide additional or different license terms and conditions for use, reproduction, or distribution of Your modifications, or for any such Derivative Works as a whole, provided Your use, reproduction, and distribution of the Work otherwise complies with the conditions stated in this License.\n\n
+
+5. Submission of Contributions.\n\n
+
+Unless You explicitly state otherwise, any Contribution intentionally submitted for inclusion in the Work by You to the Licensor shall be under the terms and conditions of this License, without any additional terms or conditions. Notwithstanding the above, nothing herein shall supersede or modify the terms of any separate license agreement you may have executed with Licensor regarding such Contributions.\n\n
+
+6. Trademarks.\n\n
+
+This License does not grant permission to use the trade names, trademarks, service marks, or product names of the Licensor, except as required for reasonable and customary use in describing the origin of the Work and reproducing the content of the NOTICE file.\n\n
+
+7. Disclaimer of Warranty.\n\n
+
+Unless required by applicable law or agreed to in writing, Licensor provides the Work (and each Contributor provides its Contributions) on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied, including, without limitation, any warranties or conditions of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A PARTICULAR PURPOSE. You are solely responsible for determining the appropriateness of using or redistributing the Work and assume any risks associated with Your exercise of permissions under this License.\n\n
+
+8. Limitation of Liability.\n\n
+
+In no event and under no legal theory, whether in tort (including negligence), contract, or otherwise, unless required by applicable law (such as deliberate and grossly negligent acts) or agreed to in writing, shall any Contributor be liable to You for damages, including any direct, indirect, special, incidental, or consequential damages of any character arising as a result of this License or out of the use or inability to use the Work (including but not limited to damages for loss of goodwill, work stoppage, computer failure or malfunction, or any and all other commercial damages or losses), even if such Contributor has been advised of the possibility of such damages.\n\n
+
+9. Accepting Warranty or Additional Liability.\n\n
+
+While redistributing the Work or Derivative Works thereof, You may choose to offer, and charge a fee for, acceptance of support, warranty, indemnity, or other liability obligations and/or rights consistent with this License. However, in accepting such obligations, You may act only on Your own behalf and on Your sole responsibility, not on behalf of any other Contributor, and only if You agree to indemnify, defend, and hold each Contributor harmless for any liability incurred by, or claims asserted against, such Contributor by reason of your accepting any such warranty or additional liability.\n\n
+
+END OF TERMS AND CONDITIONS\n
+    </string>
+    
+</resources>

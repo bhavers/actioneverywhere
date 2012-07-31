@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+  xmlns:android="http://schemas.android.com/apk/res/android" android:key="prefsScreen" android:title="@string/prefs_title">
+	<PreferenceCategory
+		android:title="@string/prefs_cat_files"
+		android:key="prefsCatFiles">
+		<CheckBoxPreference
+			android:key="checkBoxSyncWithDropbox"
+			android:title="@string/prefs_sync_with_dropbox"
+			android:disableDependentsState="false"
+			android:summary="@string/prefs_sync_with_dropbox_summary"/>
+        <Preference
+                android:key="prefBtnDropboxLogin"
+                android:title="@string/prefs_dropbox_login_not_loggedin"
+                android:summary="@string/prefs_dropbox_login_summary_not_loggedin"
+                android:dependency="checkBoxSyncWithDropbox" />
+        <Preference
+                android:key="prefBtnDropboxRemoteFile"
+                android:title="@string/prefs_dropbox_remote_file"
+                android:summary="@string/prefs_dropbox_remote_file_summary"
+                android:dependency="checkBoxSyncWithDropbox" />
+	</PreferenceCategory>
+	<PreferenceCategory
+		android:title="@string/prefs_cat_thoughts"
+		android:key="prefsCatThoughts">
+		<EditTextPreference 
+			android:key="EditTextPrefsEmail"
+			android:title="@string/prefs_email" 
+			android:summary="@string/prefs_email_summary"/>
+	</PreferenceCategory>
+</PreferenceScreen>
