@@ -10,7 +10,7 @@
     It has been designed to work with Thinking Rock 3.4.1; it might work with earlier versions.</string>
     <string name="updates">
 	Updates in this version:\n
-	- Final 1.0 release.\n\n
+	- Automatic periodic synchronization.\n\n
 	</string>
     
     <string name="textViewPhoneTitle">Action list</string>
@@ -134,6 +134,24 @@
   
    </string>
     <string name="prefs_cat_files">Files &amp; Synchronization</string>
+    <string name="prefs_sync_interval">Synchronize</string>
+    <string name="prefs_sync_interval_summary">Select the synchronization interval</string>
+    <string-array name="prefs_sync_intervals_keys">
+        <item>Never</item>
+        <item>Every 15 minutes</item>
+        <item>Every half hour</item>
+        <item>Every hour</item>
+        <item>Every half day</item>
+        <item>Every day</item>
+    </string-array>
+    <string-array name="prefs_sync_intervals_values">
+        <item>NO_INTERVAL</item>
+        <item>INTERVAL_FIFTEEN_MINUTES</item>
+        <item>INTERVAL_HALF_HOUR</item>
+        <item>INTERVAL_HOUR</item>
+        <item>INTERVAL_HALF_DAY</item>
+        <item>INTERVAL_DAY</item>
+    </string-array>
     <string name="prefs_sync_with_dropbox">Dropbox</string>
     <string name="prefs_sync_with_dropbox_summary">Click here to use Dropbox to download your Thinking Rock file</string>
     <string name="prefs_dropbox_settings">Dropbox Settings</string>
@@ -292,5 +310,7 @@ While redistributing the Work or Derivative Works thereof, You may choose to off
 
 END OF TERMS AND CONDITIONS\n
     </string>
+ 
+ 
     
 </resources>

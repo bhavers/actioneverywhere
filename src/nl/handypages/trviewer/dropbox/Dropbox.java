@@ -28,6 +28,7 @@ package nl.handypages.trviewer.dropbox;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.Date;
 import java.util.List;
 
 import nl.handypages.trviewer.MainActivity;
@@ -80,7 +81,12 @@ public class Dropbox {
     // You don't need to change these, leave them alone.
     final static private String DROPBOX_ACCOUNT_PREFS_NAME = "dropbox_prefs";
     final static private String DROPBOX_ACCESS_KEY_NAME = "ACCESS_KEY";
-    final static public String DROPBOX_FILE_MODIFICATION_DATE = "FILE_MODIFIED";
+    final static public String DROPBOX_ACTION_FILE_MODIFICATION_DATE = "ACTION_FILE_MODIFIED"; // .trx file last modified date on Dropbox
+    final static public String DROPBOX_ACTION_FILE_REV = "ACTION_FILE_REV"; // dropbox revision hash
+    final static public String DROPBOX_ACTION_FILE_CHECKED = "ACTION_FILE_CHECKED"; // The last time the file has been successfully checked for updates.
+    final static public String DROPBOX_ACTIONLIST_FILE_MODIFICATION_DATE = "ACTIONLIST_FILE_MODIFIED"; // reviewActions.xml
+    final static public String DROPBOX_ACTIONLIST_FILE_REV = "ACTIONLIST_FILE_REV"; // dropbox revision hash
+    final static public String DROPBOX_ACTIONLIST_FILE_CHECKED = "ACTIONLIST_FILE_CHECKED"; // The last  time the file has been successfully checked for updates.
     final static private String DROPBOX_ACCESS_SECRET_NAME = "ACCESS_SECRET";
     final static public String DROPBOX_REMOTE_ACTION_PATH = "DROPBOX_REMOTE_ACTION_PATH";
     final static public String DROPBOX_REMOTE_ACTIONLIST_PATH = "DROPBOX_REMOTE_ACTIONLIST_PATH";
@@ -96,6 +102,8 @@ public class Dropbox {
 	public String dropboxRemoteActionListPath;
 	public String dropboxLocalActionPath;
 	public String dropboxLocalActionListPath;
+	public String dropboxActionFileRev;
+	public String dropboxActionListFileRev;
 	//private File dropboxLocalFileObject;
 	private Context ctx;
 
@@ -189,12 +197,30 @@ public class Dropbox {
         	return null;
         }
     }
-    public String getFileLastModified () {
-        SharedPreferences prefs = ctx.getSharedPreferences(DROPBOX_ACCOUNT_PREFS_NAME, 0);
-        Log.i(MainActivity.TAG,"Last modified retrieved from prefs: " + prefs.getString(DROPBOX_FILE_MODIFICATION_DATE, ""));
-        return prefs.getString(DROPBOX_FILE_MODIFICATION_DATE, "");
+    /*
+	 * Get values from Shared Preferences. Used in this context to retrieve last modified data and revision
+	 * @param key - for last modified = DROPBOX_ACTIONLIST_FILE_MODIFIED or DROPBOX_ACTION_FILE_MODIFIED, for revision = DROPBOX_ACTIONLIST_FILE_REV or DROPBOX_ACTION_FILE_REV
+	 */
+    public String getFromSharedPrefs (String key) {
+    	
+    	SharedPreferences prefs = ctx.getSharedPreferences(DROPBOX_ACCOUNT_PREFS_NAME, 0);
+        //Log.i(MainActivity.TAG,"Getting shared prefs key: " + key + " value: "+ prefs.getString(key, ""));
+        return prefs.getString(key, "");
     }
-
+    
+    /*
+	 * Used to store Dropbox file revision and modified data in Shared Preferences.
+	 * @param key - for revision: DROPBOX_ACTIONLIST_FILE_REV or DROPBOX_ACTION_FILE_REV, for modified DROPBOX_ACTION_FILE_MODIFIED or DROPBOX_ACTIONLIST_FILE_MODIFIED
+	 * @param val - for revision: the revision hash code as return by dropbox info.getMetadata().rev(), for modified tha value return by .modified
+	 */
+    public void storeInSharedPrefs(String key, String val) { 
+        SharedPreferences prefs = ctx.getSharedPreferences(DROPBOX_ACCOUNT_PREFS_NAME, 0);
+        Editor edit = prefs.edit();
+        //Log.i(MainActivity.TAG,"Saving shared prefs key: " + key + " value: "+ val);
+        edit.putString(key, val);
+        edit.commit();
+    }
+    
     /**
      * Shows keeping the access keys returned from Trusted Authenticator in a local
      * store, rather than storing user name & password, and re-authenticating each
@@ -206,13 +232,6 @@ public class Dropbox {
         Editor edit = prefs.edit();
         edit.putString(DROPBOX_ACCESS_KEY_NAME, key);
         edit.putString(DROPBOX_ACCESS_SECRET_NAME, secret);
-        edit.commit();
-    }
-    public void storeFileModificationDate(String date) {
-        // Save the access key for later
-        SharedPreferences prefs = ctx.getSharedPreferences(DROPBOX_ACCOUNT_PREFS_NAME, 0);
-        Editor edit = prefs.edit();
-        edit.putString(DROPBOX_FILE_MODIFICATION_DATE, date);
         edit.commit();
     }
 
@@ -309,13 +328,16 @@ public class Dropbox {
     	return dropboxFileList;
     }
     /**
-     * Downloads a file to Dropbox to the local device.
-     * This only works if dropbox has been configured (user can log in, and dropbox and local path 
-     * has been set (with storeLocalPath).
-     * @return
-     * @throws Exception 
+     * Downloads the files with actions (.trx) and action lists (actionReview.xml) from Dropbox to the local device.
+     * This only works if Dropbox has been configured (user can log in, and dropbox and local path 
+     * has been set (with storeLocalPath). 
+     * 
+     * @param boolean forceDownload should be true to force a download, otherwise a check will
+     * determin if the latest file is already on the device and in that case will not be downloaded.
+     * @return false if it could not authenticate with Dropbox, true when both files have succesfully been downloaded
+     * @throws Exception (the calling method should check for DroboxIOException and IOException).
      */
-    public boolean downloadDropboxFile() throws Exception{
+    public boolean downloadDropboxFile(boolean forceDownload) throws Exception{
 		/*
 		 * If you do not authenticate() than you will get a NullPointerException in
 		 * DropboxAPI.getFile() at line 446. Authenticate makes sure some internal
@@ -333,40 +355,57 @@ public class Dropbox {
     	File dropboxLocalFileObject = new File(getLocalActionPath());
     	
     	try {
-			Log.i(MainActivity.TAG, "Reading remote path: " + getRemoteActionPath());
+			Log.i(MainActivity.TAG, "Reading (actions file) remote path: " + getRemoteActionPath());
 			bw = new BufferedOutputStream(new FileOutputStream(dropboxLocalFileObject));
-			DropboxFileInfo info = mApi.getFile(getRemoteActionPath(), null, bw, null);
-			Log.i(MainActivity.TAG, "The file's rev is: " + info.getMetadata().rev);
-			Log.i(MainActivity.TAG, "The file's modification date is: " + info.getMetadata().modified);
-			storeFileModificationDate(info.getMetadata().modified);
+			String rev = null;
+			if (forceDownload == false) {
+				rev = getFromSharedPrefs(DROPBOX_ACTION_FILE_REV);
+			} 				
+			DropboxFileInfo info = mApi.getFile(getRemoteActionPath(), rev, bw, null);
+			if (!rev.equals(info.getMetadata().rev)) {
+				Log.i(MainActivity.TAG,"A newer actions file has been downloaded from Dropbox. Previous rev: " + rev + "  New rev: " + info.getMetadata().rev);
+			} else {
+				Log.i(MainActivity.TAG,"No newer file on Dropbox");
+			}
+			storeInSharedPrefs(DROPBOX_ACTION_FILE_REV, info.getMetadata().rev);
+			storeInSharedPrefs(DROPBOX_ACTION_FILE_MODIFICATION_DATE, info.getMetadata().modified);
 		} catch (Exception e) {
-    		Log.e(MainActivity.TAG, e.getMessage() + ": Could not create local file or download file from Dropbox. Rethrowing...");
-			e.printStackTrace();
+			// Rethrow the exception and let the calling instance handle it.
+			Log.e(MainActivity.TAG, "Problem with downloading .trx file from Dropbox. Here's the message:\n" + 
+    				e.getMessage() + "\nRethrowing...");
 			throw e;
 		} finally {
     		if (bw != null) {
     			bw.close();
     		}
 		}
+    	Date now = new Date();
+		storeInSharedPrefs(DROPBOX_ACTION_FILE_CHECKED, Long.toString(now.getTime()));
 		bw = null;
     	dropboxLocalFileObject = new File(getLocalActionListPath());
     	
     	try {
-			Log.i(MainActivity.TAG, "Reading remote path: " + getRemoteActionListPath());
+			Log.i(MainActivity.TAG, "Reading (actionlists file) remote path: " + getRemoteActionListPath());
 			bw = new BufferedOutputStream(new FileOutputStream(dropboxLocalFileObject));
-			DropboxFileInfo info = mApi.getFile(getRemoteActionListPath(), null, bw, null);
-			Log.i(MainActivity.TAG, "The file's rev is: " + info.getMetadata().rev);
-			Log.i(MainActivity.TAG, "The file's modification date is: " + info.getMetadata().modified);
-			//storeFileModificationDate(info.getMetadata().modified);
-    	} catch (Exception e) {
-    		Log.e(MainActivity.TAG, "Could not create local file or download file from Dropbox.");
-			e.printStackTrace();
+			String rev = null;
+			if (forceDownload = false) {
+				rev = getFromSharedPrefs(DROPBOX_ACTIONLIST_FILE_REV);
+			} 	
+			DropboxFileInfo info = mApi.getFile(getRemoteActionListPath(), rev, bw, null);
+			storeInSharedPrefs(DROPBOX_ACTIONLIST_FILE_REV, info.getMetadata().rev);
+			storeInSharedPrefs(DROPBOX_ACTIONLIST_FILE_MODIFICATION_DATE, info.getMetadata().modified);
+		} catch (Exception e) {
+			// Rethrow the exception and let the calling instance handle it.
+    		Log.e(MainActivity.TAG, "Problem with downloading reviewActions.xml file from Dropbox. Here's the message:\n" + 
+    				e.getMessage() + "\nRethrowing...");
+			throw e;
 		} finally {
     		if (bw != null) {
     			bw.close();
     		}
 		}
-    	
+    	now = new Date();
+		storeInSharedPrefs(DROPBOX_ACTIONLIST_FILE_CHECKED, Long.toString(now.getTime()));    	
     	return true;
     }
     public String getCurrentDBPath() {

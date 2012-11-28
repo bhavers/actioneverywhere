@@ -51,9 +51,9 @@ public class DropboxDownloader extends Thread {
 			Log.i(MainActivity.TAG, "DropboxDownloader thread run() started.");
 			if (fileName != "") {
 				if (db.getAPI().getSession().isLinked()) {
-		        	Log.i(MainActivity.TAG,"Start downloading file from Dropbox");
-					db.downloadDropboxFile();
-					Log.i(MainActivity.TAG,"Finished downloading file from Dropbox");
+		        	Log.i(MainActivity.TAG,"About to start download process");
+					db.downloadDropboxFile(false);
+					Log.i(MainActivity.TAG,"Finished download process");
 		    	} 
 			} else {
 				Log.e(MainActivity.TAG, "No file supplied to DropboxDownloader." );

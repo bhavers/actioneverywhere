@@ -96,6 +96,7 @@ public class MainActivity extends Activity {
 	public static String[] LISTACTIONSTATE = null;
 	SharedPreferences prefs;
 	private Boolean prefsUseDropbox = null;
+	public static String prefsSyncInterval = null;
 	//private String prefsFilname = null;
 	//private Date prefsFilelastModDate = null; // 20120218 Can be removed if prefsFilelastModDateStr works as expected.
 	private String prefsFilelastModDateStr = null; 
@@ -118,7 +119,7 @@ public class MainActivity extends Activity {
     private TextView tvHelpTitle;
     private TextView tvHelpBody;
 
-    public Dropbox db;
+    public static Dropbox db;
     
 	
     @Override
@@ -432,6 +433,7 @@ public class MainActivity extends Activity {
 		prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 	    
 		prefsUseDropbox = prefs.getBoolean("checkBoxSyncWithDropbox", false);
+		prefsSyncInterval = prefs.getString("prefBtnSync", null);
 		
 		//prefsFilname =  prefs.getString("EditTextPrefsFileLocation", "");
 		//prefsFilname =  dropbox.getLocalPath();
@@ -449,7 +451,7 @@ public class MainActivity extends Activity {
 			}
 		    if (file.exists()) {
 		    	//prefsFilelastModDate = new Date(file.lastModified());
-		    	prefsFilelastModDateStr = db.getFileLastModified();
+		    	prefsFilelastModDateStr = db.getFromSharedPrefs(Dropbox.DROPBOX_ACTION_FILE_MODIFICATION_DATE);
 		    	//Log.i(TAG,"Last modified: " + prefsFilelastModDateStr);
 		    } else {
 		    	//Toast.makeText(getApplicationContext(), "File does not exist: " + prefsFilname, Toast.LENGTH_LONG).show();

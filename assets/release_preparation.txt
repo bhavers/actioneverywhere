@@ -1,5 +1,8 @@
 Prepare Android package:
 
+20121125: rework this extra comment in steps below: i want to publish an additional beta version, so that the original version does 
+not need to be uninstalled. The manifest has to be adapter (name changed + launcher icons)
+
 1. Test and check in to development branche of Git.
 
 2. Update AndroidManifest.xml, the following lines:
