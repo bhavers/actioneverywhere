@@ -22,6 +22,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -114,6 +116,18 @@ public class TRParser extends Thread {
 			if (fileActions != "") {
 				docActions = this.getDocumentHandle(fileActions);
 				dfm = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+				/*
+				 * SimpleDateFormat.parse() in Android 2.3 will work 
+				 * with TimeZones like GMT+xxxx etc, but it doesn't recognize UTC for 
+				 * example as a valid TimeZone for parsing. 
+				 * See: http://stackoverflow.com/questions/4379261/timezone-broken-in-simpledateformat-in-android-2-3?rq=1
+				 * 
+				 * This will cause wrong time offsets (because the time is parsed in the local
+				 * timezone instead of UTC. The solution is to set the Timezone manually.
+				 * See: http://stackoverflow.com/questions/6088778/converting-utc-dates-to-other-timezones
+				 */
+				dfm.setTimeZone(TimeZone.getTimeZone("UTC"));
+				
 				if (docActions != null) {
 					this.setActions();
 				} else {
@@ -651,6 +665,7 @@ public class TRParser extends Thread {
 					    					if (scheduled.item(k).getNodeName().equals("date") && scheduled.item(k).getTextContent() != "") {
 					    						dateTemp = null;
 												dateTemp = dfm.parse(scheduled.item(k).getTextContent());
+					    						
 					    						action.setScheduledDate(dateTemp);
 					    						//Log.i(MainActivity.TAG,"Descr: " + action.getDescription() + " :-> scheduled date= " + scheduled.item(k).getTextContent());
 					    					}

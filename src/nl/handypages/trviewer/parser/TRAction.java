@@ -17,7 +17,11 @@ package nl.handypages.trviewer.parser;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 
+import android.util.Log;
+
+import nl.handypages.trviewer.MainActivity;
 import nl.handypages.trviewer.database.ActionsDbAdapter;
 
 public class TRAction implements Comparable <TRAction>{

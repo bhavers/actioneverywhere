@@ -28,6 +28,7 @@ package nl.handypages.trviewer.dropbox;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -44,6 +45,7 @@ import android.net.Uri;
 import android.util.Log;
 
 import com.dropbox.client2.DropboxAPI;
+import com.dropbox.client2.RESTUtility;
 import com.dropbox.client2.DropboxAPI.DropboxFileInfo;
 import com.dropbox.client2.DropboxAPI.Entry;
 import com.dropbox.client2.android.AndroidAuthSession;
@@ -368,7 +370,10 @@ public class Dropbox {
 				Log.i(MainActivity.TAG,"No newer file on Dropbox");
 			}
 			storeInSharedPrefs(DROPBOX_ACTION_FILE_REV, info.getMetadata().rev);
-			storeInSharedPrefs(DROPBOX_ACTION_FILE_MODIFICATION_DATE, info.getMetadata().modified);
+			// Dropbox returns GMT time, convert to Date object and store the Local (according to the client) time. 
+			Date dt = RESTUtility.parseDate(info.getMetadata().modified);
+			storeInSharedPrefs(DROPBOX_ACTION_FILE_MODIFICATION_DATE, dt.toLocaleString());
+			
 		} catch (Exception e) {
 			// Rethrow the exception and let the calling instance handle it.
 			Log.e(MainActivity.TAG, "Problem with downloading .trx file from Dropbox. Here's the message:\n" + 

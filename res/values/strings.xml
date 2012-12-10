@@ -10,7 +10,9 @@
     It has been designed to work with Thinking Rock 3.4.1; it might work with earlier versions.</string>
     <string name="updates">
 	Updates in this version:\n
-	- Automatic periodic synchronization.\n\n
+	- Automatic periodic synchronization.\n
+	- Fixed timezone (date / time) bug\n
+	- More friendly synchronization time\n\n
 	</string>
     
     <string name="textViewPhoneTitle">Action list</string>
