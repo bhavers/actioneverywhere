@@ -17,6 +17,9 @@ package nl.handypages.trviewer;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
+
+import com.dropbox.client2.RESTUtility;
 
 import nl.handypages.trviewer.dropbox.Dropbox;
 import nl.handypages.trviewer.dropbox.DropboxDownloader;
@@ -209,10 +212,46 @@ public class MainActivity extends Activity {
    
     private void updateRefreshLabel() {
     	if (listActions.size() > 0) {
-			//textViewMainRefreshTime.setText(prefsFilelastModDate.toLocaleString() + " - " + Integer.toString(listActions.size()) + " actions");
-    		textViewMainRefreshTime.setText(prefsFilelastModDateStr + "\n" + Integer.toString(listActions.size()) + " actions");
+    		textViewMainRefreshTime.setText(getString(R.string.update_last_update) + " " + getLastUpdate(prefsFilelastModDateStr) + "\n" + Integer.toString(listActions.size()) + " actions");
     		lv1.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, getActionLists(getBaseContext())));
 		}
+    }
+    
+    /**
+     * Converts the date to a human readable 'last updated' date. Eg. 1 minute ago, 12 minutes ago, 3 hours ago, yesterday 12:33PM
+     * @return
+     */
+    private String getLastUpdate(String date) {
+    	try {
+			Date updateDate = new Date(date);
+			Date systemDate = new Date();
+			if (updateDate != null || systemDate != null) {
+				if (systemDate.before(updateDate)) {
+					Log.i(MainActivity.TAG,"Strange, the file update date if after the date/time of the device");
+					return "0" + " " + getString(R.string.update_minutes_ago);
+				} else {
+					long minutes = ((systemDate.getTime()/60000) - (updateDate.getTime()/60000));
+					if ((minutes / 60) > 6) {
+						// More than six hour ago, show date and time
+						return updateDate.toLocaleString();
+					}
+					if ((minutes / 60) > 0) {
+						// More than one hour ago, show hours since last update
+						return minutes / 60 + " " + getString(R.string.update_hours_ago);
+					}
+					if ((minutes / 60) < 1) {
+						// Less than one hour ago, show hours since last update
+						return minutes + " " + getString(R.string.update_minutes_ago);
+					}
+					//return Long.toString(minutes);
+					//return (int) result;
+				}	
+			} 
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+    	
+    	return ""; // will never happen
     }
     /*
 	 * Update the home screen (if no action lists have been created, show setup instructions)
@@ -286,6 +325,7 @@ public class MainActivity extends Activity {
 		 *  changed preferences.
 		 */
 		getPreferences();
+		updateRefreshLabel();
 		db = new Dropbox(this); //
 		lv1.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, getActionLists(getBaseContext())));
 		if (dropboxFileChanged) {
@@ -434,32 +474,7 @@ public class MainActivity extends Activity {
 	    
 		prefsUseDropbox = prefs.getBoolean("checkBoxSyncWithDropbox", false);
 		prefsSyncInterval = prefs.getString("prefBtnSync", null);
-		
-		//prefsFilname =  prefs.getString("EditTextPrefsFileLocation", "");
-		//prefsFilname =  dropbox.getLocalPath();
-		//Log.i(TAG,"Using file: " + db.getLocalActionPath());
-		if (db.getLocalActionPath() != null) {
-			File file = null;
-			/*
-			 * File can not handle prefix file://
-			 */
-			if (db.getLocalActionPath().startsWith("file://")) {
-				db.storeLocalPath(db.getLocalActionPath().substring(6), db.getLocalActionListPath());
-				file = new File(db.getLocalActionPath());
-			} else {
-				file = new File(db.getLocalActionPath());
-			}
-		    if (file.exists()) {
-		    	//prefsFilelastModDate = new Date(file.lastModified());
-		    	prefsFilelastModDateStr = db.getFromSharedPrefs(Dropbox.DROPBOX_ACTION_FILE_MODIFICATION_DATE);
-		    	//Log.i(TAG,"Last modified: " + prefsFilelastModDateStr);
-		    } else {
-		    	//Toast.makeText(getApplicationContext(), "File does not exist: " + prefsFilname, Toast.LENGTH_LONG).show();
-		    	// 20111119: Commented out setting prefsFilname to null because this doesn't work correctly on new
-		    	// devices, but this might be a problem later on.
-		    	//prefsFilname = null;
-		    }
-		}
+		prefsFilelastModDateStr = db.getFromSharedPrefs(Dropbox.DROPBOX_ACTION_FILE_MODIFICATION_DATE);
 	    prefsEmailForThoughts = prefs.getString("EditTextPrefsEmail", "");
     }
 	

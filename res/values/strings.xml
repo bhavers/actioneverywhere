@@ -11,12 +11,15 @@
     <string name="updates">
 	Updates in this version:\n
 	- Automatic periodic synchronization.\n
-	- Fixed timezone (date / time) bug\n
-	- More friendly synchronization time\n\n
+	- Fixed timezone problem (date / time was offset by some hours)\n
+	- More friendly last update time in main screen\n\n
 	</string>
     
     <string name="textViewPhoneTitle">Action list</string>
     <string name="action_list_no_items">No actions.\nCheck filter settings (press Menu button).</string>
+    <string name="update_last_update">Update:</string>
+    <string name="update_minutes_ago">minutes ago</string>
+    <string name="update_hours_ago">hours ago</string>
     <string-array name="action_list_filters">
     	<item>Context</item>
     	<item>Topic</item>
