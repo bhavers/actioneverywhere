@@ -32,52 +32,19 @@ import android.util.Log;
 
 public class DropboxDownloader extends Thread {
 
-
-	String fileName = null;
 	private Dropbox db;
-	Handler mHandler; // used to handle message exchange with the calling activity
+	private Handler downloadHandler;
+	private boolean forceDownload;
 	
-	public DropboxDownloader(Dropbox dropbox, String fileTRX, Handler h) {
+	public DropboxDownloader(Dropbox dropbox, boolean forceDownload, Handler h) {
 		super();
-		//Log.i(MainActivity.TAG, "DropboxDownloader thread initialized...");
 		this.db = dropbox;
-		mHandler = h;
-		fileName = fileTRX;
+		this.forceDownload = forceDownload;
+		downloadHandler = h;
 	}
 	
 	@Override
 	public void run() {
-		try {
-			Log.i(MainActivity.TAG, "DropboxDownloader thread run() started.");
-			if (fileName != "") {
-				if (db.getAPI().getSession().isLinked()) {
-		        	Log.i(MainActivity.TAG,"About to start download process");
-					db.downloadDropboxFile(false);
-					Log.i(MainActivity.TAG,"Finished download process");
-		    	} 
-			} else {
-				Log.e(MainActivity.TAG, "No file supplied to DropboxDownloader." );
-			}
-			updateProgress(100);
-		} catch (DropboxIOException e) {
-			Log.e(MainActivity.TAG, "DropboxIOException: is the network down?");
-			updateProgress(MainActivity.PROGRESS_DROPBOXIOEXCEPTION);
-		} catch (IOException e) {
-	    	Log.e(MainActivity.TAG, "IOException: Could not read or write the file downloaded from Dropbox.");
-			updateProgress(MainActivity.PROGRESS_IOEXCEPTION);
-	    } catch (Exception e) {
-			Log.e(MainActivity.TAG, "Exception: in DropboxDownloader thread.");
-			updateProgress(MainActivity.PROGRESS_EXCEPTION);
-		}
+		db.downloadDropboxFile(forceDownload, downloadHandler);
 	}
-    
-
-    private void updateProgress(int progressPercentage) {
-    	// Sends update message to calling Activity via Handler with the total update progress in percentage
-    	Message msg = mHandler.obtainMessage();
-    	msg.arg1 = progressPercentage;
-    	mHandler.sendMessage(msg);
-    }
-
-
 }

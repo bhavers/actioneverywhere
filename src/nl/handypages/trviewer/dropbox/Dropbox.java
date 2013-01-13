@@ -28,7 +28,7 @@ package nl.handypages.trviewer.dropbox;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.text.DateFormat;
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
@@ -42,6 +42,8 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 
 import com.dropbox.client2.DropboxAPI;
@@ -51,6 +53,7 @@ import com.dropbox.client2.DropboxAPI.Entry;
 import com.dropbox.client2.android.AndroidAuthSession;
 import com.dropbox.client2.android.AuthActivity;
 import com.dropbox.client2.exception.DropboxException;
+import com.dropbox.client2.exception.DropboxIOException;
 import com.dropbox.client2.session.AccessTokenPair;
 import com.dropbox.client2.session.AppKeyPair;
 import com.dropbox.client2.session.Session.AccessType;
@@ -94,7 +97,30 @@ public class Dropbox {
     final static public String DROPBOX_REMOTE_ACTIONLIST_PATH = "DROPBOX_REMOTE_ACTIONLIST_PATH";
     final static public String DROPBOX_LOCAL_ACTION_PATH = "DROPBOX_LOCAL_ACTION_PATH";
     final static public String DROPBOX_LOCAL_ACTIONLIST_PATH = "DROPBOX_LOCAL_ACTIONLIST_PATH";
+    final static public String DROPBOX_CHECKED = "DROPBOX_CHECKED"; // last time dropbox was checked for a new file
+
+    /*
+     * The two constants for download progress indication below (success and error) will always be submitted.
+     * Use these to determine final success or failure in the call object. 
+     */
+    public static final int DOWNLOAD_PROGRESS_FINISHED_SUCCESS_MODIFIED = 100; // The processed finished successfully, a new file was downloaded.
+    public static final int DOWNLOAD_PROGRESS_FINISHED_SUCCESS_NOT_MODIFIED = 101; // The processed finished successfully, nothing downloaded, file locally and remote the same.
+    public static final int DOWNLOAD_PROGRESS_FINISHED_ERROR = -1; // An error happened and the process could not me finished succesfully.
     
+    /*
+     * The constants for download progress indication below are all intermediate progress indications. 
+     */
+    public static final int DOWNLOAD_PROGRESS_PREPARING = 10;
+	public static final int DOWNLOAD_PROGRESS_START_ACTION_FILE = 20;
+	public static final int DOWNLOAD_PROGRESS_START_ACTIONLIST_FILE = 30;
+    
+	public static final int DOWNLOAD_PROGRESS_EXCEPTION = -12;
+	public static final int DOWNLOAD_PROGRESS_IOEXCEPTION= -11;
+	public static final int DOWNLOAD_PROGRESS_DROPBOXIOEXCEPTION = -10;
+	public static final int DOWNLOAD_PROGRESS_EXCEPTION_AUTHENTICATION = -9;
+	public static final int DOWNLOAD_PROGRESS_EXCEPTION_MISSING_FILE = -8;
+	
+	 
     public boolean mLoggedIn;	
     private DropboxAPI<AndroidAuthSession> mApi;
     
@@ -108,6 +134,8 @@ public class Dropbox {
 	public String dropboxActionListFileRev;
 	//private File dropboxLocalFileObject;
 	private Context ctx;
+	private Handler mHandler; // used to handle message exchange with the calling activity
+
 
 
     
@@ -334,85 +362,124 @@ public class Dropbox {
      * This only works if Dropbox has been configured (user can log in, and dropbox and local path 
      * has been set (with storeLocalPath). 
      * 
-     * @param boolean forceDownload should be true to force a download, otherwise a check will
-     * determin if the latest file is already on the device and in that case will not be downloaded.
-     * @return false if it could not authenticate with Dropbox, true when both files have succesfully been downloaded
-     * @throws Exception (the calling method should check for DroboxIOException and IOException).
+     * @param boolean forceDownload to force a download, otherwise a check will
+     * determine if the latest file is already on the device and in that case will not be downloaded.
      */
-    public boolean downloadDropboxFile(boolean forceDownload) throws Exception{
+    public void downloadDropboxFile(boolean forceDownload, Handler downloadHandler){
 		/*
 		 * If you do not authenticate() than you will get a NullPointerException in
 		 * DropboxAPI.getFile() at line 446. Authenticate makes sure some internal
 		 * variables are set.
 		 */
-    	if (!mApi.getSession().isLinked()) {
-			return false;
-		} 
-		
-    	if (getRemoteActionPath() == null || getLocalActionPath() == null) {
-    		Log.e(MainActivity.TAG,"Dropbox: either the remote or local path has not been set.");
-    		return false;
-    	}
+    	
+    	// Variables below will be reused to download both files, make sure set to null between download 1 and 2.
+    	boolean modified = false; // will be set to true if any of the two files has changed (and have been downloaded).
+    	Date now = new Date(); // used to store the date/time that this download check has been performed
     	BufferedOutputStream bw = null;
-    	File dropboxLocalFileObject = new File(getLocalActionPath());
+    	File dropboxLocalFileObject; // local file to store retrieved data in (temp), reused for both downloads
+    	String rev = ""; // used to store revision id from Dropbox (to validate if file has changed).
+    	DropboxFileInfo info = null; // object to retrieve information about the file on dropbox
+    	
+    	if (downloadHandler == null) {
+    		return;
+    	} else {
+    		this.mHandler = downloadHandler;
+    	}
+    	
+    	updateProgress(DOWNLOAD_PROGRESS_PREPARING);
+    	if (!mApi.getSession().isLinked()) {
+    		updateProgress(DOWNLOAD_PROGRESS_EXCEPTION_AUTHENTICATION);
+    		updateProgress(DOWNLOAD_PROGRESS_FINISHED_ERROR);
+			return;
+		} 
+    	if (getRemoteActionPath() == null || getRemoteActionPath().equalsIgnoreCase("") || getLocalActionPath() == null || getLocalActionPath().equalsIgnoreCase("")) {
+    		updateProgress(DOWNLOAD_PROGRESS_EXCEPTION_MISSING_FILE);
+    		updateProgress(DOWNLOAD_PROGRESS_FINISHED_ERROR);
+    		Log.e(MainActivity.TAG,"Dropbox: either the remote or local path has not been set.");
+    		return;
+    	} 
     	
     	try {
-			Log.i(MainActivity.TAG, "Reading (actions file) remote path: " + getRemoteActionPath());
+    		/**
+    		 * Start download of actions file.
+    		 */
+    		
+    		updateProgress(DOWNLOAD_PROGRESS_START_ACTION_FILE);
+    		dropboxLocalFileObject = new File(getLocalActionPath());
+    		// Log.d(MainActivity.TAG, "Reading (actions file) remote path: " + getRemoteActionPath());
 			bw = new BufferedOutputStream(new FileOutputStream(dropboxLocalFileObject));
-			String rev = null;
 			if (forceDownload == false) {
 				rev = getFromSharedPrefs(DROPBOX_ACTION_FILE_REV);
-			} 				
-			DropboxFileInfo info = mApi.getFile(getRemoteActionPath(), rev, bw, null);
-			if (!rev.equals(info.getMetadata().rev)) {
-				Log.i(MainActivity.TAG,"A newer actions file has been downloaded from Dropbox. Previous rev: " + rev + "  New rev: " + info.getMetadata().rev);
 			} else {
-				Log.i(MainActivity.TAG,"No newer file on Dropbox");
+				//Log.i(MainActivity.TAG,"Force download file from Dropbox");
 			}
+			info = mApi.getFile(getRemoteActionPath(), rev, bw, null);
+			if (!rev.equals(info.getMetadata().rev)) {
+				modified = true;
+				//Log.i(MainActivity.TAG,"A newer actions file has been downloaded from Dropbox. Previous rev: " + rev + "  New rev: " + info.getMetadata().rev);
+			} 
 			storeInSharedPrefs(DROPBOX_ACTION_FILE_REV, info.getMetadata().rev);
-			// Dropbox returns GMT time, convert to Date object and store the Local (according to the client) time. 
+			// Dropbox returns GMT time, convert to Date object and store GMT time. 
 			Date dt = RESTUtility.parseDate(info.getMetadata().modified);
-			storeInSharedPrefs(DROPBOX_ACTION_FILE_MODIFICATION_DATE, dt.toLocaleString());
-			
-		} catch (Exception e) {
-			// Rethrow the exception and let the calling instance handle it.
-			Log.e(MainActivity.TAG, "Problem with downloading .trx file from Dropbox. Here's the message:\n" + 
-    				e.getMessage() + "\nRethrowing...");
-			throw e;
-		} finally {
-    		if (bw != null) {
-    			bw.close();
-    		}
-		}
-    	Date now = new Date();
-		storeInSharedPrefs(DROPBOX_ACTION_FILE_CHECKED, Long.toString(now.getTime()));
-		bw = null;
-    	dropboxLocalFileObject = new File(getLocalActionListPath());
-    	
-    	try {
-			Log.i(MainActivity.TAG, "Reading (actionlists file) remote path: " + getRemoteActionListPath());
+			storeInSharedPrefs(DROPBOX_ACTION_FILE_MODIFICATION_DATE, dt.toGMTString());
+
+			/**
+			 * Start download of action list file
+			 */
+			updateProgress(DOWNLOAD_PROGRESS_START_ACTIONLIST_FILE);
+			bw = null;
+			dropboxLocalFileObject = new File(getLocalActionListPath());
+			rev = "";
+			info = null;
+			// Log.d(MainActivity.TAG, "Reading (actionlists file) remote path: " + getRemoteActionListPath());
 			bw = new BufferedOutputStream(new FileOutputStream(dropboxLocalFileObject));
-			String rev = null;
 			if (forceDownload = false) {
 				rev = getFromSharedPrefs(DROPBOX_ACTIONLIST_FILE_REV);
 			} 	
-			DropboxFileInfo info = mApi.getFile(getRemoteActionListPath(), rev, bw, null);
+			info = mApi.getFile(getRemoteActionListPath(), rev, bw, null);
 			storeInSharedPrefs(DROPBOX_ACTIONLIST_FILE_REV, info.getMetadata().rev);
 			storeInSharedPrefs(DROPBOX_ACTIONLIST_FILE_MODIFICATION_DATE, info.getMetadata().modified);
+    	
+			// Set date-time of this last check of Dropbox.
+			storeInSharedPrefs(DROPBOX_CHECKED, now.toGMTString());
+			
+    	} catch (DropboxIOException e) {
+			Log.e(MainActivity.TAG, "DropboxIOException: is the network down?");
+			updateProgress(Dropbox.DOWNLOAD_PROGRESS_DROPBOXIOEXCEPTION);
+			updateProgress(DOWNLOAD_PROGRESS_FINISHED_ERROR);
+		} catch (IOException e) {
+	    	Log.e(MainActivity.TAG, "IOException: Could not read or write the file downloaded from Dropbox.");
+			updateProgress(Dropbox.DOWNLOAD_PROGRESS_IOEXCEPTION);
+			updateProgress(DOWNLOAD_PROGRESS_FINISHED_ERROR);
 		} catch (Exception e) {
 			// Rethrow the exception and let the calling instance handle it.
-    		Log.e(MainActivity.TAG, "Problem with downloading reviewActions.xml file from Dropbox. Here's the message:\n" + 
-    				e.getMessage() + "\nRethrowing...");
-			throw e;
+			Log.e(MainActivity.TAG, "Problem with downloading file from Dropbox. Here's the message:\n" + e.getMessage());
+			updateProgress(Dropbox.DOWNLOAD_PROGRESS_EXCEPTION);
+			updateProgress(DOWNLOAD_PROGRESS_FINISHED_ERROR);
 		} finally {
     		if (bw != null) {
-    			bw.close();
+    			try {
+					bw.close();
+				} catch (IOException e) {
+					Log.e(MainActivity.TAG, "IOException: Could not close BufferedOutputStream.");
+					e.printStackTrace();
+				}
+    			if (modified == true) {
+    				updateProgress(DOWNLOAD_PROGRESS_FINISHED_SUCCESS_MODIFIED);
+    			} else {
+    				updateProgress(DOWNLOAD_PROGRESS_FINISHED_SUCCESS_NOT_MODIFIED);
+    			}
     		}
 		}
-    	now = new Date();
-		storeInSharedPrefs(DROPBOX_ACTIONLIST_FILE_CHECKED, Long.toString(now.getTime()));    	
-    	return true;
     }
+    
+    private void updateProgress(int progressPercentage) {
+    	// Sends update message to calling Activity via Handler with the total update progress in percentage
+    	Message msg = mHandler.obtainMessage();
+    	msg.arg1 = progressPercentage;
+    	mHandler.sendMessage(msg);
+    }
+    
     public String getCurrentDBPath() {
     	if (dbFoldercontents.size() == 0) return "";
     	else return ctx.getString(R.string.dropbox_base_path) + dbFoldercontents.get(0).parentPath();

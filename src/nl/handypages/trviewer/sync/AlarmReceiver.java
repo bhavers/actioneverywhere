@@ -27,7 +27,7 @@ public class AlarmReceiver extends BroadcastReceiver
      @Override
      public void onReceive(Context context, Intent intent) 
      {   
-    	 Log.d(MainActivity.TAG,"AlarmReceiver.onReceive()");
+    	 //Log.d(MainActivity.TAG,"AlarmReceiver.onReceive()");
     	 this.context = context;
     	 PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
          wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "");
@@ -43,26 +43,27 @@ public class AlarmReceiver extends BroadcastReceiver
       * Will release the Wake Lock for the device.
       */
      private void finished() {
-    	 Log.d(MainActivity.TAG, "Cleaning up, releasing WakeLock.");
+    	 //Log.d(MainActivity.TAG, "Cleaning up, releasing WakeLock.");
     	 context = null;
-    	 wl.release();
+    	 try {
+			wl.release();
+		} catch (Exception e) {
+			// Do nothing, something get a Wakelock under-locked Runtime exception, that just says that there is nothing to unlock.
+			//Log.e(MainActivity.TAG,"Exception on releasing WakeLock: " + e.getMessage());
+		}
      }
      
      private boolean downloadFiles() {
     	 db = new Dropbox(context);
-    	 if (db.getLocalActionPath() != null) {
-    		dbDownloaderThread = new DropboxDownloader(db, db.getLocalActionPath(), downloadHandler);
-         	dbDownloaderThread.start();
-         }
+   		 dbDownloaderThread = new DropboxDownloader(db, false, downloadHandler);
+       	 dbDownloaderThread.start();
     	 return true;
      }
      
      /**
-      * Parses the downloaded the file and writes content to database.
-      * A 
+      * Parses the downloaded file and writes content to database.
       */
      private void parseXMLtoDb() {
-     	//getPreferences(); // After downloading the file modification date has changed, which is read in getPreferences()
      	if (db.getLocalActionPath() != "" && db.existsLocalFile()) {
             parsingThread = new TRParser(context, db.getLocalActionPath(), db.getLocalActionListPath(), parsingHandler);
             parsingThread.start();
@@ -71,7 +72,7 @@ public class AlarmReceiver extends BroadcastReceiver
      
 public void SetAlarm(Context context)
  {
-	Log.d(MainActivity.TAG,"AlarmReceiver.setAlarm()");
+	//Log.d(MainActivity.TAG,"AlarmReceiver.setAlarm()");
      AlarmManager am=(AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
      Intent i = new Intent(context, AlarmReceiver.class);
      PendingIntent pi = PendingIntent.getBroadcast(context, 0, i, 0);
@@ -80,9 +81,9 @@ public void SetAlarm(Context context)
 	 Boolean prefsUseDropbox = prefs.getBoolean("checkBoxSyncWithDropbox", false);
 	 String prefsSyncInterval = prefs.getString("prefBtnSync", null);
 	 
-	 Log.d(MainActivity.TAG,"prefsSyncInterval = " + prefsSyncInterval);
+	 //Log.d(MainActivity.TAG,"prefsSyncInterval = " + prefsSyncInterval);
 	 if (prefsUseDropbox == true) {
-		  Log.d(MainActivity.TAG, "Alarm onReceive, interval: " + prefsSyncInterval);
+		  //Log.d(MainActivity.TAG, "Alarm onReceive, interval: " + prefsSyncInterval);
 		  //am.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), 1000 * 60 * 10, pi); // Millisec * Second * Minute
 		  // !!! Use AlarmManager.INTERVAL_* for energy optimization + type should maybe be ELAPSED_REALTIME_WAKEUP
 		  // Now every minute for testing.
@@ -130,27 +131,31 @@ public void SetAlarm(Context context)
 	 	public void handleMessage(Message msg) {
 	 		/*
 	 		 * Handles the messages that are return by the DropboxDownloader thread 
-	 		 * Currently it is not updated from DropboxDownloader, maybe in the 
-	 		 * future to present more details while downloading.
 	 		 */
 
 	 		int total = msg.arg1;
 	 		
-	 		if (total == MainActivity.PROGRESS_DROPBOXIOEXCEPTION) {
+	 		if (total == Dropbox.DOWNLOAD_PROGRESS_DROPBOXIOEXCEPTION) {
 	 			Log.e(MainActivity.TAG, "AlarmReceiver: could not download file");
+	 		}
+	 		if (total == Dropbox.DOWNLOAD_PROGRESS_IOEXCEPTION) {
+	 			Log.e(MainActivity.TAG, "AlarmReceiver: IOException");
+    		}
+    		if (total == Dropbox.DOWNLOAD_PROGRESS_EXCEPTION) {
+    			Log.e(MainActivity.TAG, "AlarmReceiver: could not finish downloading.");
+    		}
+    		if (total == Dropbox.DOWNLOAD_PROGRESS_FINISHED_ERROR) {
+    			Log.e(MainActivity.TAG, "AlarmReceiver: problem downloading files, stopped.");
+	 			finished();
+    		}
+	 		if (total == Dropbox.DOWNLOAD_PROGRESS_FINISHED_SUCCESS_NOT_MODIFIED){
+	 			Log.i(MainActivity.TAG, "AlarmReceiver: file up to date");
 	 			finished();
 	 		}
-	 		if (total == MainActivity.PROGRESS_IOEXCEPTION) {
-	 			Log.e(MainActivity.TAG, "AlarmReceiver: IOException");
-	 			finished();
-    		}
-    		if (total == MainActivity.PROGRESS_EXCEPTION) {
-    			Log.e(MainActivity.TAG, "AlarmReceiver: could not finish downloading.");
-	 			finished();
-    		}
-	 		if (total >= MainActivity.PROGRESS_FINISH){
+	 		if (total == Dropbox.DOWNLOAD_PROGRESS_FINISHED_SUCCESS_MODIFIED){
 	 			Log.i(MainActivity.TAG, "AlarmReceiver: file up to date with Dropbox");
-	 			parseXMLtoDb();
+	 			parseXMLtoDb(); 
+	 			finished();
 	 		}
 	 	}
 	 };

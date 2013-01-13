@@ -15,11 +15,8 @@
  *******************************************************************************/
 package nl.handypages.trviewer;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
-
-import com.dropbox.client2.RESTUtility;
 
 import nl.handypages.trviewer.dropbox.Dropbox;
 import nl.handypages.trviewer.dropbox.DropboxDownloader;
@@ -72,20 +69,16 @@ public class MainActivity extends Activity {
 	static final int ABOUT_DIALOG = 2;
 	static final int HELP_DIALOG = 3;
 	
-	public static final int PROGRESS_START = 0;
-	public static final int PROGRESS_CONTEXTS = 10;
-	public static final int PROGRESS_TOPICS = 20;
-	public static final int PROGRESS_PROJECTS = 30;
-	public static final int PROGRESS_ACTORS = 45;
-	public static final int PROGRESS_ACTIONS = 65;
-	public static final int PROGRESS_DB_WRITE = 80;
-	public static final int PROGRESS_ACTIONLISTS = 90;
-	public static final int PROGRESS_FINISH = 100;
-	public static final int PROGRESS_DROPBOXIOEXCEPTION = -10;
-	public static final int PROGRESS_IOEXCEPTION= -11;
-	public static final int PROGRESS_EXCEPTION = -12;
-	
-    private ListView lv1;
+	public static final int PARSING_PROGRESS_START = 0;
+	public static final int PARSING_PROGRESS_CONTEXTS = 10;
+	public static final int PARSING_PROGRESS_TOPICS = 20;
+	public static final int PARSING_PROGRESS_PROJECTS = 30;
+	public static final int PARSING_PROGRESS_ACTORS = 45;
+	public static final int PARSING_PROGRESS_ACTIONS = 65;
+	public static final int PARSING_PROGRESS_DB_WRITE = 80;
+	public static final int PARSING_PROGRESS_ACTIONLISTS = 90;
+	public static final int PARSING_PROGRESS_FINISH = 100;
+	private ListView lv1;
 	private TextView textViewMainRefreshTime;
 	// listActions, listContext. listActors and listTopics are populate by the TRParser thread.
 	public static ArrayList<TRAction> listActions = null;
@@ -103,6 +96,7 @@ public class MainActivity extends Activity {
 	//private String prefsFilname = null;
 	//private Date prefsFilelastModDate = null; // 20120218 Can be removed if prefsFilelastModDateStr works as expected.
 	private String prefsFilelastModDateStr = null; 
+	private String prefsDropboxLastChecked = null;
 	public static String prefsEmailForThoughts = null;
 		
 	private static ActionListHelper actionListHelper;
@@ -183,7 +177,6 @@ public class MainActivity extends Activity {
 		});
 
 		setActionsFromDb();
-		
 
 	    // Action states are hard coded in TR; retrieve from Array in R.
         LISTACTIONSTATE = getResources().getStringArray(R.array.action_status);
@@ -210,9 +203,13 @@ public class MainActivity extends Activity {
 	    }
     }
    
-    private void updateRefreshLabel() {
-    	if (listActions.size() > 0) {
-    		textViewMainRefreshTime.setText(getString(R.string.update_last_update) + " " + getLastUpdate(prefsFilelastModDateStr) + "\n" + Integer.toString(listActions.size()) + " actions");
+    public void updateRefreshLabel() {
+    	if ((listActions != null) && (listActions.size() > 0)) {
+    		textViewMainRefreshTime.setText(Integer.toString(listActions.size()) + " actions: " + getLastUpdate(prefsFilelastModDateStr) + "\n");
+    		if ((prefsDropboxLastChecked != null) && (!prefsDropboxLastChecked.equalsIgnoreCase(""))) {
+    			// If available include last checked date.
+    			textViewMainRefreshTime.setText(textViewMainRefreshTime.getText() + getString(R.string.update_last_checked) + " " + getLastUpdate(prefsDropboxLastChecked));
+    		}
     		lv1.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, getActionLists(getBaseContext())));
 		}
     }
@@ -297,7 +294,7 @@ public class MainActivity extends Activity {
 	 * Reads Actions, Actors, Contexts and Topics from database and fills local variables.
 	 */
 	private void setActionsFromDb() {
-		Log.i(MainActivity.TAG,"Reading actions, actors, contexts and topics from db.");
+		//Log.i(MainActivity.TAG,"Reading actions, actors, contexts and topics from db.");
 		listActions = null;
     	listContexts = null;
     	listTopics = null;
@@ -324,8 +321,9 @@ public class MainActivity extends Activity {
 		 *  might have changed the actions lists. Also reload dropbox because the user might have
 		 *  changed preferences.
 		 */
-		getPreferences();
-		updateRefreshLabel();
+		//getPreferences();
+		//updateRefreshLabel();
+		refresh();
 		db = new Dropbox(this); //
 		lv1.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, getActionLists(getBaseContext())));
 		if (dropboxFileChanged) {
@@ -398,9 +396,7 @@ public class MainActivity extends Activity {
 	            			db.getLocalActionListPath(), handler);
 	            }
         	case DOWNLOADING_PROGRESS_DIALOG:
-	            if (db.getLocalActionPath() != null) {
-	            	dbDownloaderThread = new DropboxDownloader(db, db.getLocalActionPath(), downloadHandler);
-	            }
+        		
 		}
     	
     }
@@ -416,10 +412,7 @@ public class MainActivity extends Activity {
     		
     		if (total >= 100){
     			removeDialog(PARSING_PROGRESS_DIALOG);
-    			getActionLists(getApplicationContext()); // update the action list display when parsing of lists has finished.
-    			setActionsFromDb();
-    			updateRefreshLabel();
-    			updateListGUI();
+    			refresh();
     		}
     	}
     };
@@ -434,25 +427,37 @@ public class MainActivity extends Activity {
     		 */
     		int total = msg.arg1;
     		
-    		if (total == PROGRESS_DROPBOXIOEXCEPTION) {
+    		if (total == Dropbox.DOWNLOAD_PROGRESS_DROPBOXIOEXCEPTION) {
     			dismissDialog(DOWNLOADING_PROGRESS_DIALOG);
     			Toast.makeText(getApplicationContext(), getString(R.string.progress_dropboxexception), Toast.LENGTH_LONG).show();
     		}
-    		if (total == PROGRESS_IOEXCEPTION) {
+    		if (total == Dropbox.DOWNLOAD_PROGRESS_IOEXCEPTION) {
     			dismissDialog(DOWNLOADING_PROGRESS_DIALOG);
     			Toast.makeText(getApplicationContext(), getString(R.string.progress_ioexception), Toast.LENGTH_LONG).show();
     		}
-    		if (total == PROGRESS_EXCEPTION) {
+    		if (total == Dropbox.DOWNLOAD_PROGRESS_EXCEPTION) {
     			dismissDialog(DOWNLOADING_PROGRESS_DIALOG);
     			Toast.makeText(getApplicationContext(), getString(R.string.progress_exception), Toast.LENGTH_LONG).show();
     		}
-    		if (total >= PROGRESS_FINISH){
+    		if (total == Dropbox.DOWNLOAD_PROGRESS_EXCEPTION_MISSING_FILE) {
+    			dismissDialog(DOWNLOADING_PROGRESS_DIALOG);
+    			Toast.makeText(getApplicationContext(), getString(R.string.progress_exception_missing_file), Toast.LENGTH_LONG).show();
+    		}
+    		if (total == Dropbox.DOWNLOAD_PROGRESS_FINISHED_SUCCESS_MODIFIED){
     			dismissDialog(DOWNLOADING_PROGRESS_DIALOG);
     			//updateRefreshLabel();
     			/*Intent intent = new Intent(MainActivity.this, MainActivity.class);
     			finish();
     	        startActivity(intent);*/
     			parseXMLtoDb();
+    		}
+    		if (total == Dropbox.DOWNLOAD_PROGRESS_FINISHED_SUCCESS_NOT_MODIFIED){
+    			dismissDialog(DOWNLOADING_PROGRESS_DIALOG);
+    			refresh();
+    		}
+    		if (total == Dropbox.DOWNLOAD_PROGRESS_FINISHED_ERROR){
+    			dismissDialog(DOWNLOADING_PROGRESS_DIALOG);
+    			refresh();
     		}
     	}
     };
@@ -465,7 +470,7 @@ public class MainActivity extends Activity {
     	listTopics = null;
     	listActionLists = null;
     	listActors = null;
-    	Log.i(TAG,"MainActivity.onDestroy(): actionListHelper.close()");
+    	Log.d(TAG,"MainActivity.onDestroy(): actionListHelper.close()");
     	actionListHelper.close();
     };
     
@@ -475,6 +480,7 @@ public class MainActivity extends Activity {
 		prefsUseDropbox = prefs.getBoolean("checkBoxSyncWithDropbox", false);
 		prefsSyncInterval = prefs.getString("prefBtnSync", null);
 		prefsFilelastModDateStr = db.getFromSharedPrefs(Dropbox.DROPBOX_ACTION_FILE_MODIFICATION_DATE);
+		prefsDropboxLastChecked = db.getFromSharedPrefs(Dropbox.DROPBOX_CHECKED);
 	    prefsEmailForThoughts = prefs.getString("EditTextPrefsEmail", "");
     }
 	
@@ -522,11 +528,11 @@ public class MainActivity extends Activity {
     	listTopics = null;
     	listActionLists = null;
     	listActors = null;
-    	//dropbox = new Dropbox(this);
         getPreferences();
     	if (prefsUseDropbox == true && db.isLinked()) {
     		showDialog(DOWNLOADING_PROGRESS_DIALOG);
-        	dbDownloaderThread.start();
+           	dbDownloaderThread = new DropboxDownloader(db, true, downloadHandler);
+           	dbDownloaderThread.start();
     	} else {
     		Toast.makeText(getApplicationContext(), "Can not refresh actions, Dropbox preferences not set.", Toast.LENGTH_SHORT).show();
     	}
@@ -539,5 +545,16 @@ public class MainActivity extends Activity {
     		Toast.makeText(getApplicationContext(), ((TextView) view).getText() + ": set email in Preferences.", Toast.LENGTH_LONG).show();
     	}
     }
+
+	/**
+	 * Re-reads preferences, actions and actionlists from db and refreshes the GUI
+	 */
+	private void refresh() {
+		getActionLists(getApplicationContext()); // update the action list display when parsing of lists has finished.
+		setActionsFromDb();
+		getPreferences();
+		updateRefreshLabel();
+		updateListGUI();
+	}
 
 }

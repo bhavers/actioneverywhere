@@ -12,12 +12,13 @@
 	Updates in this version:\n
 	- Automatic periodic synchronization.\n
 	- Fixed timezone problem (date / time was offset by some hours)\n
-	- More friendly last update time in main screen\n\n
+	- Improved update information\n\n
 	</string>
     
     <string name="textViewPhoneTitle">Action list</string>
     <string name="action_list_no_items">No actions.\nCheck filter settings (press Menu button).</string>
     <string name="update_last_update">Update:</string>
+    <string name="update_last_checked">Last check:</string>
     <string name="update_minutes_ago">minutes ago</string>
     <string name="update_hours_ago">hours ago</string>
     <string-array name="action_list_filters">
@@ -113,12 +114,8 @@
    	Step 3: Select the file (in Preferences).\n\n
    	Step 4: Return to the home screen. (Back button, the file will now be downloaded)\n\n
    
-   Adding or editting lists:\n
-   There are two types of action lists:\n
-   1. Lists defined in Thinking Rock.\n
-   You can not make changes to these lists.\n
-   2. Lists defined in Action Everywhere.\n
-   You can customize these lists (Menu -> Edit Lists) and apply your own filters (select a list -> Menu -> Filter).\n\n
+   Besides the standard Thinking Rock lists, you can create your own customized lists. Select (Menu --> Edit Lists).
+   After adding your list you should open it to apply your own filters (with the custom list opened select: Menu -> Filter).\n\n
    
    Limited support for Thinking Rock filters:\n
    Not all filters from Thinking Rock are supported in this app. This may lead to some inconsistencies.\n
@@ -191,6 +188,7 @@
     <string name="progress_dropboxexception">Refresh cancelled!\nCan not download file from Dropbox, do you have network connectivity?</string>
     <string name="progress_ioexception">Refresh cancelled!\nCan not read or write file from Dropbox on your device, do you have enough space available?</string>
     <string name="progress_exception">Refresh cancelled!\nAn error has occurred while trying to download a file from Dropbox </string>
+    <string name="progress_exception_missing_file">Refresh cancelled!\nNo file selected to download from Dropbox (see Preferences)</string>
     
     <string name="dropbox_base_path">/App/Action Everywhere</string>
     <string name="dropbox_downloading">Downloading file from Dropbox</string>

@@ -22,7 +22,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Locale;
 import java.util.TimeZone;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -111,7 +110,7 @@ public class TRParser extends Thread {
 	public void run() {
 		try {
 			//Log.i("TRV_Main", "TRParser thread run() started.");
-			updateProgress(MainActivity.PROGRESS_START);
+			updateProgress(MainActivity.PARSING_PROGRESS_START);
 			
 			if (fileActions != "") {
 				docActions = this.getDocumentHandle(fileActions);
@@ -151,7 +150,7 @@ public class TRParser extends Thread {
 				Log.e(MainActivity.TAG, ctx.getResources().getString(R.string.error_file_not_supplied));
 			}
 			
-			updateProgress(MainActivity.PROGRESS_FINISH);
+			updateProgress(MainActivity.PARSING_PROGRESS_FINISH);
 		} catch (Exception e) {
 			Log.e("TRV_Main", "Exception in TRParser thread");
 			e.printStackTrace();
@@ -302,7 +301,7 @@ public class TRParser extends Thread {
 		    if (listActionLists.size() > 0) {
 		    	actionlistHelper.create(listActionLists);
 		    }
-		    updateProgress(MainActivity.PROGRESS_ACTIONLISTS);
+		    updateProgress(MainActivity.PARSING_PROGRESS_ACTIONLISTS);
 		    //actionListAdapter.close();
 		} catch (XPathExpressionException e) {
 			Log.e(MainActivity.TAG,"XPathExpressionException: " + e.getMessage());
@@ -363,7 +362,7 @@ public class TRParser extends Thread {
 	    		}
 	    		listContexts.add(context);
 		    }
-		    updateProgress(MainActivity.PROGRESS_CONTEXTS);
+		    updateProgress(MainActivity.PARSING_PROGRESS_CONTEXTS);
 		    
 		    /**
 		     * set Topic
@@ -392,7 +391,7 @@ public class TRParser extends Thread {
 	    		}
 	    		listTopics.add(topic);
 		    }
-		    updateProgress(MainActivity.PROGRESS_TOPICS);
+		    updateProgress(MainActivity.PARSING_PROGRESS_TOPICS);
 			
 		    /**
 		     * set Topic
@@ -468,7 +467,7 @@ public class TRParser extends Thread {
 	    			listProjects.add(project);
 	    		}
 		    }
-		    updateProgress(MainActivity.PROGRESS_PROJECTS);
+		    updateProgress(MainActivity.PARSING_PROGRESS_PROJECTS);
 		    
 		    
 		    /**
@@ -504,7 +503,7 @@ public class TRParser extends Thread {
 	    		}
 	    		listActors.add(actor);
 		    }
-		    updateProgress(MainActivity.PROGRESS_ACTORS);
+		    updateProgress(MainActivity.PARSING_PROGRESS_ACTORS);
 		    /**
 			 * set Actions
 			 */
@@ -765,7 +764,7 @@ public class TRParser extends Thread {
 		    			}
 		    		}
 		    		listActions.add(action);
-		    		updateProgress(MainActivity.PROGRESS_ACTIONS);
+		    		updateProgress(MainActivity.PARSING_PROGRESS_ACTIONS);
 	    		}
 	    	}
     	if (listActions.size() > 0) {
@@ -797,7 +796,7 @@ public class TRParser extends Thread {
 			Log.e(MainActivity.TAG,"Exception: " + e.getMessage());
 			e.printStackTrace();
 		}
-		updateProgress(MainActivity.PROGRESS_DB_WRITE);
+		updateProgress(MainActivity.PARSING_PROGRESS_DB_WRITE);
 	}
 	/*
 	 * Convert from the context index to the id.
