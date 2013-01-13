@@ -93,8 +93,6 @@ public class MainActivity extends Activity {
 	SharedPreferences prefs;
 	private Boolean prefsUseDropbox = null;
 	public static String prefsSyncInterval = null;
-	//private String prefsFilname = null;
-	//private Date prefsFilelastModDate = null; // 20120218 Can be removed if prefsFilelastModDateStr works as expected.
 	private String prefsFilelastModDateStr = null; 
 	private String prefsDropboxLastChecked = null;
 	public static String prefsEmailForThoughts = null;
@@ -112,7 +110,6 @@ public class MainActivity extends Activity {
     ProgressDialog downloadingProgressDialog;
     AlertDialog helpDialog;
     private Dialog aboutDialog;
-    //private AlertDialog eulaDialog;
     private TextView tvHelpTitle;
     private TextView tvHelpBody;
 
@@ -126,7 +123,6 @@ public class MainActivity extends Activity {
         	new Eula(this).show();
 		}
         setContentView(R.layout.main);
-        db = new Dropbox(this);
         
         actionListHelper = new ActionListHelper(this);
         actionHelper = new ActionHelper(this);
@@ -138,24 +134,10 @@ public class MainActivity extends Activity {
         textViewMainRefreshTime = (TextView) findViewById(R.id.textViewMainRefreshTime);
         tvHelpTitle = (TextView) findViewById(R.id.textViewMainHelpTitle);
         tvHelpBody = (TextView) findViewById(R.id.textViewMainHelp);
-        lv1 = (ListView)findViewById(R.id.listViewMain);
-        //ArrayList<String> actionListsToDisplay = getActionLists(getBaseContext());
-        
+        lv1 = (ListView)findViewById(R.id.listViewMain);  
         tvHelpTitle = (TextView) findViewById(R.id.textViewMainHelpTitle);
         tvHelpBody = (TextView) findViewById(R.id.textViewMainHelp);
-        
-        /*Already done in onResume()
-         * if (actionListsToDisplay.size() == 0) {
-        	tvHelpTitle.setVisibility(View.VISIBLE);
-        	tvHelpBody.setVisibility(View.VISIBLE);
-        	tvHelpBody.setTextSize(12);
-	    } else {
-	    	tvHelpTitle.setVisibility(View.GONE);
-	    	tvHelpBody.setVisibility(View.GONE);
-	    }
-        
-        lv1.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, actionListsToDisplay));	*/
-		
+      
         lv1.setOnItemClickListener(new OnItemClickListener(){
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -166,7 +148,6 @@ public class MainActivity extends Activity {
 	            	ListView tmpLv = (ListView)parent;
 	            	String tmp = (String)tmpLv.getItemAtPosition(position);
 	            	bundle.putString("actionList", tmp);
-	            	//Log.i(TAG,"Item clicked: " + tmp);
 	            	
 	            	intent.putExtras(bundle);
 	            	startActivity(intent);
@@ -180,30 +161,21 @@ public class MainActivity extends Activity {
 
 	    // Action states are hard coded in TR; retrieve from Array in R.
         LISTACTIONSTATE = getResources().getStringArray(R.array.action_status);
-
-
     }
     
     /**
-     * Parses the downloaded the file and writes content to database. 
+     * Parses the downloaded file and writes content to database. 
      */
     private void parseXMLtoDb() {
-    	//getPreferences(); // After downloading the file modification date has changed, which is read in getPreferences()
     	if (db.getLocalActionPath() != "" && db.existsLocalFile()) {
-	        if (listActions == null) {
-	        	listActions = null;
-	        	listContexts = null;
-	        	listTopics = null;
-	        	listProjects = null;
-	        	listActors = null;
-	        	listActionLists = null;
-	        	showDialog(PARSING_PROGRESS_DIALOG);
-	        	parsingProgressThread.start();
-	        }
+        	showDialog(PARSING_PROGRESS_DIALOG);
+	        parsingProgressThread.start();
 	    }
     }
-   
-    public void updateRefreshLabel() {
+   /**
+    * Updates the label at the top of the main activity. It shows number of actions, datetime of actions, datetime of last check.
+    */
+    private void updateRefreshLabel() {
     	if ((listActions != null) && (listActions.size() > 0)) {
     		textViewMainRefreshTime.setText(Integer.toString(listActions.size()) + " actions: " + getLastUpdate(prefsFilelastModDateStr) + "\n");
     		if ((prefsDropboxLastChecked != null) && (!prefsDropboxLastChecked.equalsIgnoreCase(""))) {
@@ -240,8 +212,6 @@ public class MainActivity extends Activity {
 						// Less than one hour ago, show hours since last update
 						return minutes + " " + getString(R.string.update_minutes_ago);
 					}
-					//return Long.toString(minutes);
-					//return (int) result;
 				}	
 			} 
 		} catch (Exception e) {
@@ -250,12 +220,11 @@ public class MainActivity extends Activity {
     	
     	return ""; // will never happen
     }
+    
     /*
-	 * Update the home screen (if no action lists have been created, show setup instructions)
+	 * Update the main activity (if no action lists have been created, show setup instructions)
 	 */
     private void updateListGUI() {
-    	
-		//Log.i(MainActivity.TAG,"Number of lists: " + Integer.toString(lv1.getAdapter().getCount()));
         if (lv1.getAdapter().getCount() == 0) {
         	tvHelpTitle.setVisibility(View.VISIBLE);
         	tvHelpBody.setVisibility(View.VISIBLE);
@@ -266,14 +235,6 @@ public class MainActivity extends Activity {
 	    }
     }
     
-    /*
-    public static ArrayList<String> getActionLists() {
-    	
-    	//Map<String,Integer> storedLists = (Map<String, Integer>) db; // all values stored in db
-    	ArrayList<String> displayLists = new ArrayList<String>(); // The ordered list for display
-    	return displayLists;
-    }*/
-    
 	public static ArrayList<String> getActionLists(Context ctx) {
     	ArrayList<String> displayLists = new ArrayList<String>(); // empty, will be build in refreshLists()
 		listActionLists = actionListHelper.getActionListCustom(false); // first add lists from TR-app
@@ -283,10 +244,6 @@ public class MainActivity extends Activity {
     	for (int i = 0; i < listActionLists.size(); i++) {
     		displayLists.add(listActionLists.get(i).getName());
 		} 
-    	
-    	//displayLists = actionListHelper.getActionListCustom(false); // first add lists from TR-app
-		//displayLists.addAll(actionListHelper.getActionListCustom(true)); // than add custom lists (defined by user) at the bottom (if available). 
-		//Log.i(TAG,"MainActivity.getActionLists(ctx): actionListHelper.close()");
     	actionListHelper.close();
 		return displayLists;
 	}
@@ -294,7 +251,6 @@ public class MainActivity extends Activity {
 	 * Reads Actions, Actors, Contexts and Topics from database and fills local variables.
 	 */
 	private void setActionsFromDb() {
-		//Log.i(MainActivity.TAG,"Reading actions, actors, contexts and topics from db.");
 		listActions = null;
     	listContexts = null;
     	listTopics = null;
@@ -306,31 +262,18 @@ public class MainActivity extends Activity {
 		listActors = actorHelper.getActors();
 		listContexts = contextHelper.getContexts();
 		listTopics = topicHelper.getTopics();
-		
-		getPreferences();
-		updateRefreshLabel();
-		
 	}
 	
 	
 	@Override
 	protected void onResume() {
 		super.onResume();
-		/*
-		 *  Update the action list menu, because when EditListActivity have been accessed the user 
-		 *  might have changed the actions lists. Also reload dropbox because the user might have
-		 *  changed preferences.
-		 */
-		//getPreferences();
-		//updateRefreshLabel();
 		refresh();
-		db = new Dropbox(this); //
-		lv1.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, getActionLists(getBaseContext())));
+		// When a new file on Dropbox is selected in preferences, it should automatically be downloaded.
 		if (dropboxFileChanged) {
 			dropboxFileChanged = false;
-			refreshActions();
+			download();
 		}
-		updateListGUI();
 	} 
 
 	/**
@@ -393,7 +336,7 @@ public class MainActivity extends Activity {
         		parsingProgressDialog.setProgress(0);
 	            if (db.getLocalActionPath() != null) {
 	            	parsingProgressThread = new TRParser(getBaseContext(), db.getLocalActionPath(), 
-	            			db.getLocalActionListPath(), handler);
+	            			db.getLocalActionListPath(), parserHandler);
 	            }
         	case DOWNLOADING_PROGRESS_DIALOG:
         		
@@ -401,7 +344,7 @@ public class MainActivity extends Activity {
     	
     }
 
-    final Handler handler = new Handler() {
+    final Handler parserHandler = new Handler() {
     	@Override
     	public void handleMessage(Message msg) {
     		/*
@@ -464,7 +407,6 @@ public class MainActivity extends Activity {
     
     protected void onDestroy() {
     	super.onDestroy();
-    	//parsingProgressThread = null;
     	listActions = null;
     	listContexts = null;
     	listTopics = null;
@@ -497,7 +439,7 @@ public class MainActivity extends Activity {
 	    // Handle item selection in the preferences menu
 	    switch (item.getItemId()) {
 	    case R.id.refreshBtn:
-	    	refreshActions();
+	    	download();
 	        return true;
 	    case R.id.prefsBtn:
 	    	Intent settingsActivity = new Intent(getBaseContext(), PrefsActivitity.class);
@@ -522,13 +464,10 @@ public class MainActivity extends Activity {
 	        return super.onOptionsItemSelected(item);
 	    }
 	}
-    public void refreshActions() {
-    	listActions = null;
-    	listContexts = null;
-    	listTopics = null;
-    	listActionLists = null;
-    	listActors = null;
-        getPreferences();
+    /*
+     * Downloads the latest files from Dropbox.
+     */
+    private void download() {
     	if (prefsUseDropbox == true && db.isLinked()) {
     		showDialog(DOWNLOADING_PROGRESS_DIALOG);
            	dbDownloaderThread = new DropboxDownloader(db, true, downloadHandler);
@@ -536,6 +475,7 @@ public class MainActivity extends Activity {
     	} else {
     		Toast.makeText(getApplicationContext(), "Can not refresh actions, Dropbox preferences not set.", Toast.LENGTH_SHORT).show();
     	}
+    	//refresh();
     }
     public void newThought(View view) {
     	if (prefsEmailForThoughts != "") {
@@ -550,11 +490,13 @@ public class MainActivity extends Activity {
 	 * Re-reads preferences, actions and actionlists from db and refreshes the GUI
 	 */
 	private void refresh() {
+		db = new Dropbox(this);
 		getActionLists(getApplicationContext()); // update the action list display when parsing of lists has finished.
 		setActionsFromDb();
 		getPreferences();
 		updateRefreshLabel();
 		updateListGUI();
+		lv1.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, getActionLists(getBaseContext())));
 	}
 
 }

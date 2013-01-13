@@ -11,8 +11,8 @@
     <string name="updates">
 	Updates in this version:\n
 	- Automatic periodic synchronization.\n
-	- Fixed timezone problem (date / time was offset by some hours)\n
-	- Improved update information\n\n
+	- Improved last synchronization information\n
+	- Fixed incorrect time indication\n\n
 	</string>
     
     <string name="textViewPhoneTitle">Action list</string>
