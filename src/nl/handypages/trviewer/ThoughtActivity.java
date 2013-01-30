@@ -84,13 +84,17 @@ public class ThoughtActivity extends Activity {
     public void send(View view) {
 
     	if (MainActivity.prefsEmailForThoughts != "") {
-	    	Intent i = new Intent(Intent.ACTION_SEND);
-	    	i.setType("text/html");
-	    	i.putExtra(Intent.EXTRA_EMAIL  , new String[]{MainActivity.prefsEmailForThoughts});
-	    	i.putExtra(Intent.EXTRA_SUBJECT, editTextThought.getText().toString());
-	    	i.putExtra(Intent.EXTRA_TEXT   , editTextThought.getText().toString() + "\n\nTopic: " + spinner.getSelectedItem().toString() + strSentFrom );
-	    	try {
-	    	    startActivity(Intent.createChooser(i, "Send thought via email:"));
+    			String topic = ""; 
+    			if (spinner.getSelectedItem() != null) { 
+    				spinner.getSelectedItem().toString();
+    			} 
+	    		Intent i = new Intent(Intent.ACTION_SEND);
+		    	i.setType("text/html");
+		    	i.putExtra(Intent.EXTRA_EMAIL  , new String[]{MainActivity.prefsEmailForThoughts});
+		    	i.putExtra(Intent.EXTRA_SUBJECT, editTextThought.getText().toString());
+		    	i.putExtra(Intent.EXTRA_TEXT   , editTextThought.getText().toString() + "\n\nTopic: " + topic + strSentFrom );
+		    try {    
+		    	startActivity(Intent.createChooser(i, "Send thought via email:"));
 	    	} catch (android.content.ActivityNotFoundException ex) {
 	    	    Toast.makeText(getApplicationContext(), "There are no email clients installed.", Toast.LENGTH_SHORT).show();
 	    	}
@@ -114,7 +118,13 @@ public class ThoughtActivity extends Activity {
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
                 RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Voice recognition Demo...");
-        startActivityForResult(intent, REQUEST_CODE);
+        try {
+			startActivityForResult(intent, REQUEST_CODE);
+		} catch (Exception e) {
+			Log.e(MainActivity.TAG,"Error starting voice recognition: " + e.getMessage());
+			Toast.makeText(getApplicationContext(), getString(R.string.voice_recognition_exception), Toast.LENGTH_LONG).show();
+		}
+        
     }
     
     /**

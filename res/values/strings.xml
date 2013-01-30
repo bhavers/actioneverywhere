@@ -190,6 +190,8 @@
     <string name="progress_exception">Refresh cancelled!\nAn error has occurred while trying to download a file from Dropbox </string>
     <string name="progress_exception_missing_file">Refresh cancelled!\nNo file selected to download from Dropbox (see Preferences)</string>
     
+    <string name="voice_recognition_exception">Problem starting voice recognition.</string>
+    
     <string name="dropbox_base_path">/App/Action Everywhere</string>
     <string name="dropbox_downloading">Downloading file from Dropbox</string>
     <string name="dropbox_Remote_Path_Label">Dropbox Remote File (eg. /actions/tr.trx)</string>

@@ -182,7 +182,7 @@ public class MainActivity extends Activity {
     			// If available include last checked date.
     			textViewMainRefreshTime.setText(textViewMainRefreshTime.getText() + getString(R.string.update_last_checked) + " " + getLastUpdate(prefsDropboxLastChecked));
     		}
-    		lv1.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, getActionLists(getBaseContext())));
+    		//lv1.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, getActionLists(getBaseContext())));
 		}
     }
     
@@ -495,8 +495,8 @@ public class MainActivity extends Activity {
 		setActionsFromDb();
 		getPreferences();
 		updateRefreshLabel();
-		updateListGUI();
 		lv1.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, getActionLists(getBaseContext())));
+		updateListGUI();
 	}
 
 }
