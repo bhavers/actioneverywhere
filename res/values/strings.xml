@@ -7,12 +7,12 @@
     for Thinking Rock (www.trgtd.com.au). It synchronizes your Thinking Rock data (.trx and ReviewActions.xml files) 
     using Dropbox to your phone. The app starts directly with your action lists. You can also create
     customized lists.
-    It has been designed to work with Thinking Rock 3.4.1; it might work with earlier versions.</string>
+    It has been designed to work with Thinking Rock 3.4.2; it might work with earlier versions.</string>
     <string name="updates">
 	Updates in this version:\n
-	- Automatic periodic synchronization (see Preferences).\n
-	- Improved last synchronization information\n
-	- Fixed incorrect time indication\n\n
+	- Fixed crash on startup\n
+	- Fixed bug on starting voice recognition\n
+	- Fixed bug on sending thought\n\n
 	</string>
     
     <string name="textViewPhoneTitle">Action list</string>
