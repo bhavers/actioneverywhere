@@ -21,6 +21,8 @@ not need to be uninstalled. The manifest has to be adapter (name changed + launc
 - Check for useless logging/debugging messages.
 
 5. Check in to development branch
+- include message like: Release 1.6 and update manifest
+- include sign-off by ...
 
 6. Check into master branche
 - Check out master branche
@@ -31,27 +33,25 @@ as described in strings.xml
 7. Export
 - Right click project --> Export.
 
+8. Update Google Play store
+- Upload to Google Play and publish (takes several hours to be availble)
+- Check description of application
+- Update the 'Recent changes' text.
+
 Update website:
-1. Edit download page
-- Change text at bottom: version + copy/paste updates from strings.xml (make bulletted list + remove \n at the end).
-- Remove previous version
-- Upload new version (don't forget to push Upload button)
-- Provide description like: Action Anywhere Beta 5
-- Also update description in Menu Settings and submit
-
-2. Test download and install file
-- Have to uninstall development file before installing the one from website.
-
-3. Update news item + newsletter 
+9. Update news item + newsletter 
 - Copy text from previous release
 - Add Content --> Simple Newsletter
 - Title format: Beta 5 is available for download
 - Description: Paste text + replace bulleted update list with updates from from Download page (copy/paste)
 - Save
 - Send test email with announcement of new release (On Newsletter tab)
-- If Ok send to all.
 
-4. Set Git back to Development branch.
+10. Send newsletter
+- Wait for new app to be available in Google Play
+- Send newsletter
+
+11. Set Git back to Development branch.
 
 Finished.
 

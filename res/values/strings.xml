@@ -10,9 +10,8 @@
     It has been designed to work with Thinking Rock 3.4.2; it might work with earlier versions.</string>
     <string name="updates">
 	Updates in this version:\n
-	- Fixed crash on startup\n
-	- Fixed bug on starting voice recognition\n
-	- Fixed bug on sending thought\n\n
+	- Setup automated test framework, to improve release quality\n
+	- \n\n
 	</string>
     
     <string name="textViewPhoneTitle">Action list</string>
@@ -240,6 +239,7 @@ Save your Thinking Rock file (.trx) in this folder, restart Thinking Rock and se
     	&lt;li>&lt;a href="http://www.trgtd.com.au/">Avente Pty Ltd&lt;/a> for their great application Thinking Rock&lt;/li>
     	&lt;li>&lt;a href="http://www.davidco.com/">David Allen Company&lt;/a> for Getting Thinks Done &lt;/li>
 	    &lt;li>&lt;a href="http://www.dropbox.com">Dropbox&lt;/a> for their service, API and sample code&lt;/li>
+	    &lt;li>&lt;a href="http://www.robotium.org">Robotium&lt;/a> for their automated test framework&lt;/li>
 	    &lt;li>Donn Felker for his &lt;a href="http://blog.donnfelker.com/2011/02/17/android-a-simple-eula-for-your-android-apps/">Eula popup sample code&lt;/a>&lt;/li>
     &lt;/ul>
     </string>

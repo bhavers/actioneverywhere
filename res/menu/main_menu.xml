@@ -12,6 +12,7 @@
     <item 
     	android:title="@string/menu_item_preferences" 
     	android:id="@+id/prefsBtn" 
+    	android:alphabeticShortcut="P"
     	android:icon="@drawable/ic_menu_preferences"/>
     <item 
     	android:title="@string/menu_item_help" 
