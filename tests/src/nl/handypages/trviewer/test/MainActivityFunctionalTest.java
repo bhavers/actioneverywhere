@@ -2,8 +2,11 @@ package nl.handypages.trviewer.test;
 
 import com.jayway.android.robotium.solo.Solo;
 
+import nl.handypages.trviewer.ActionListActivity;
 import nl.handypages.trviewer.MainActivity;
 import nl.handypages.trviewer.R;
+import android.app.Activity;
+import android.content.Intent;
 import android.preference.CheckBoxPreference;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -125,27 +128,66 @@ public class MainActivityFunctionalTest extends ActivityInstrumentationTestCase2
 		assertEquals(true, actual); // Download has been successful.
 	}
 	
+	@SmallTest
 	public void testAction() {
 		solo.clickOnText("This Week");
 		ListView actionList = (ListView)solo.getView(android.R.id.list);
 		assertTrue(actionList.getCount() > 0);
-		solo.setActivityOrientation(Solo.LANDSCAPE);
+		/*solo.setActivityOrientation(Solo.LANDSCAPE);
 		solo.sleep(1000);
 		solo.setActivityOrientation(Solo.PORTRAIT);
 		assertTrue(actionList.getCount() > 0);
 		solo.clickInList(0);
 		solo.setActivityOrientation(Solo.LANDSCAPE);
 		solo.sleep(1000);
-		solo.setActivityOrientation(Solo.PORTRAIT);
-		solo.goBack();
-		solo.goBack();
-		//getInstrumentation().callActivityOnDestroy(solo.getCurrentActivity());
-		//solo.sleep(3000);
-		//getInstrumentation().callActivityOnResume(solo.getCurrentActivity());
+		solo.setActivityOrientation(Solo.PORTRAIT);*/
+		
+		solo.clickInList(0);
+
+		// Now simulate sleep to see if latest state is persisted. 
+		// The methods work, but the activity doesn't seem to be taken out of memory..
+		getInstrumentation().callActivityOnStop(solo.getCurrentActivity());
+		solo.sleep(2000);
+		getInstrumentation().callActivityOnRestart(solo.getCurrentActivity());
+		
+		
+		// Alternative method by destroying and restarting app. But restarting start in MainActivity instead of ActionListActivity.
+		/*Log.i(MainActivity.TAG,"destroying activity / " + solo.getCurrentActivity().getLocalClassName());
+		callActivityOnDestroy(solo.getCurrentActivity());
+		Log.i(MainActivity.TAG,"starting activity");
+		callActivityStart(solo.getCurrentActivity());
+		Log.i(MainActivity.TAG,"finished starting activity");
+		//getInstrumentation().callActivityOnCreate(getActivity(),null);
+		solo.sleep(3000);*/
+		
+		// after sleep go back to actionlist, if state not preserved than it might nog show actions.
+		//solo.goBack();
+		//actionList = (ListView)solo.getView(android.R.id.list);
 		//assertTrue(actionList.getCount() > 0);
+		solo.sleep(3000);
 	}
 	
-	@SmallTest
+	/*
+	 * Destroy an activity to test what happens. Can be called by the test scripts.
+	 */
+	public void callActivityOnDestroy(final Activity activity){
+	    getInstrumentation().runOnMainSync(new Runnable() {
+	            public void run() {
+	                activity.finish();
+	            }
+	        });
+	}
+	/*
+	 * Start MainActivity. Can be called by the test scripts.
+	 */
+	public void callActivityStart(final Activity activity){
+	    getInstrumentation().runOnMainSync(new Runnable() {
+	            public void run() {
+	                activity.startActivity(new Intent(activity, MainActivity.class));
+	            }
+	        });
+	}
+	
 	public void testFilters() {
 		
 		// Create a new custom list
