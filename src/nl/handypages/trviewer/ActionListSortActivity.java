@@ -18,6 +18,8 @@ package nl.handypages.trviewer;
 import java.util.ArrayList;
 import java.util.Map;
 
+import com.google.analytics.tracking.android.EasyTracker;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -80,6 +82,19 @@ public class ActionListSortActivity extends Activity {
         manager.setSharedPreferencesName("trv_lists");
         addPreferencesFromResource(R.xml.lists);**/
     }
+
+    @Override
+    public void onStart() {
+      super.onStart();
+      EasyTracker.getInstance().activityStart(this);
+    }
+ 
+    @Override
+    public void onStop() {
+      super.onStop();
+      EasyTracker.getInstance().activityStop(this); 
+    }
+ 
 	public void removeList(View view) {
 	     /** 
 	      * See this post on how to implement handling multiple selected entries:

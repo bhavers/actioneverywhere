@@ -10,7 +10,9 @@
     It has been designed to work with Thinking Rock 3.4.2; it might work with earlier versions.</string>
     <string name="updates">
 	Updates in this version:\n
-	- Setup automated test framework, to improve release quality\n
+	- Setup automated test framework to improve code quality\n
+	- Included Google Analytics for usage analysis\n
+	- Included a privacy policy in Help and on actioneverywhere.com\n
 	- \n\n
 	</string>
     
@@ -133,6 +135,14 @@
    - Every action without a date\n
    - Future actions\n\n
   
+  Privacy statement:\n
+	Action Everywhere uses Google Analytics to help analyze how users use the app. The information about your use (including IP address) is transmitted to Google. 
+	This information is used to evaluate users\' use of the app.\n 
+	We will not (and will not allow any third party to) use the statistical analytics tool to track or to collect any Personally Identifiable Information (PII) of visitors to our site. 
+	We will not associate any data gathered from this site with any Personally Identifiable Information from any source, unless you explicitly 
+	submit that information via a fill-in form on our website.\n\n
+	You can disable usage analytics in the Preferences menu. \n\n
+  
    </string>
     <string name="prefs_cat_files">Files &amp; Synchronization</string>
     <string name="prefs_sync_interval">Synchronize</string>
@@ -163,7 +173,10 @@
     <string name="prefs_dropbox_login_summary_not_loggedin">Click here to login to Dropbox.</string>
     <string name="prefs_dropbox_remote_file">Select Dropbox File</string>
     <string name="prefs_dropbox_remote_file_summary">Click here to select your Thinking Rock file (this can take 30 secs, please wait).</string>
-	<string name="prefs_cat_thoughts">Thoughts</string>    
+	<string name="prefs_cat_thoughts">Thoughts</string>
+	<string name="prefs_cat_analytics">Analytics</string>
+	<string name="prefs_analytics_checkbox_label">Disable Analytics</string>
+	<string name="prefs_analytics_checkbox_summary">Google Analytics is used for usage analysis to improve Action Everywhere. Your privacy is respected, see Help for our privacy statement.</string>        
     <string name="prefs_email">Email thoughts</string>
     <string name="prefs_email_summary">Email address to send thoughts to (configure Thinking Rock to retrieve these emails)</string>
     

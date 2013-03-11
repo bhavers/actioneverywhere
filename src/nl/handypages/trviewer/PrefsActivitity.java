@@ -28,6 +28,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
@@ -40,6 +41,9 @@ import android.widget.Toast;
 import com.dropbox.client2.DropboxAPI;
 import com.dropbox.client2.android.AndroidAuthSession;
 import com.dropbox.client2.session.TokenPair;
+import com.google.analytics.tracking.android.EasyTracker;
+import com.google.analytics.tracking.android.GoogleAnalytics;
+import com.google.analytics.tracking.android.GoogleAnalytics.AppOptOutCallback;
 
 public class PrefsActivitity extends PreferenceActivity {
     
@@ -57,6 +61,8 @@ public class PrefsActivitity extends PreferenceActivity {
 	private Preference prefDropboxLogin;
 	private Preference prefDropboxRemoteFile;
 	private ListPreference prefSyncInterval;
+	private CheckBoxPreference prefAnalytics;
+	private GoogleAnalytics googleAnalytics;
 	private boolean firstAuthentication;
 	
 	
@@ -80,6 +86,18 @@ public class PrefsActivitity extends PreferenceActivity {
 		prefDropboxLogin = (Preference) findPreference("prefBtnDropboxLogin");
 		prefDropboxRemoteFile = (Preference) findPreference("prefBtnDropboxRemoteFile");
 		prefSyncInterval = (ListPreference) findPreference("prefBtnSync");
+		prefAnalytics = (CheckBoxPreference) findPreference("prefCheckBoxAnalytics");
+		googleAnalytics = GoogleAnalytics.getInstance(this);
+		// Get the state of app opt out and match it to the setting applied in MainActivity at startup.
+    	googleAnalytics.requestAppOptOut(new AppOptOutCallback() {
+			@Override
+			public void reportAppOptOut(boolean optOut) {
+				Editor editor = prefs.edit();
+				editor.putBoolean("prefCheckBoxAnalytics", optOut);
+				editor.commit();
+				prefAnalytics.setChecked(optOut); // After setting sharedprefs, also update checkbox gui.
+			}
+		});
 		setSyncSummary();
 		
 		/**
@@ -126,8 +144,31 @@ public class PrefsActivitity extends PreferenceActivity {
 		});
 		//prefSyncInterval.setOnPreferenceChangeListener(this);
 		
+		prefAnalytics.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+			public boolean onPreferenceChange(Preference preference, Object newValue) {
+				boolean disableAnalytics = (Boolean)newValue;
+				googleAnalytics.setAppOptOut(disableAnalytics);
+				Log.i(MainActivity.TAG,"Disable Google Analytics = " + Boolean.toString(disableAnalytics));
+				return true;
+			}
+
+		});
+		
 		changeUILoggedInState(db.mLoggedIn);
 	}
+
+    @Override
+    public void onStart() {
+      super.onStart();
+      EasyTracker.getInstance().activityStart(this);
+    }
+ 
+    @Override
+    public void onStop() {
+      super.onStop();
+      EasyTracker.getInstance().activityStop(this); 
+    }
+ 
 	/**
      * Convenience function to change UI state based on being logged in
      */
@@ -202,7 +243,6 @@ public class PrefsActivitity extends PreferenceActivity {
     protected void onResume() {
     	super.onResume();
     	AndroidAuthSession session = mApi.getSession();
-
         // The next part must be inserted in the onResume() method of the
         // activity from which session.startAuthentication() was called, so
         // that Dropbox authentication completes properly.

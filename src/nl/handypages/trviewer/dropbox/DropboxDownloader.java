@@ -15,14 +15,7 @@
  *******************************************************************************/
 package nl.handypages.trviewer.dropbox;
 
-import java.io.IOException;
-
-import com.dropbox.client2.exception.DropboxIOException;
-
-import nl.handypages.trviewer.MainActivity;
 import android.os.Handler;
-import android.os.Message;
-import android.util.Log;
 
 /**
  * DownloadHelper for Dropbox that runs in a separate thread.

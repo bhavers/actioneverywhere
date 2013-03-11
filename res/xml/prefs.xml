@@ -37,4 +37,12 @@
 			android:title="@string/prefs_email" 
 			android:summary="@string/prefs_email_summary"/>
 	</PreferenceCategory>
+	<PreferenceCategory
+		android:title="@string/prefs_cat_analytics"
+		android:key="prefsCatAnalytics">
+		<CheckBoxPreference
+			android:key="prefCheckBoxAnalytics"
+			android:title="@string/prefs_analytics_checkbox_label"
+			android:summary="@string/prefs_analytics_checkbox_summary"/>
+	</PreferenceCategory>
 </PreferenceScreen>

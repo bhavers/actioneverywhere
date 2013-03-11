@@ -16,6 +16,9 @@
 package nl.handypages.trviewer;
 
 import java.util.ArrayList;
+
+import com.google.analytics.tracking.android.EasyTracker;
+
 import nl.handypages.trviewer.helpers.ActionListHelper;
 import nl.handypages.trviewer.parser.TRActionList;
 
@@ -54,6 +57,18 @@ public class EditListsActivity extends Activity {
 
     }
 
+    @Override
+    public void onStart() {
+      super.onStart();
+      EasyTracker.getInstance().activityStart(this);
+    }
+ 
+    @Override
+    public void onStop() {
+      super.onStop();
+      EasyTracker.getInstance().activityStop(this); 
+    }
+ 
 	/**
 	 * Retrieves all custom defined lists from database and populates the global
 	 * customLists ArrayList<String>. 

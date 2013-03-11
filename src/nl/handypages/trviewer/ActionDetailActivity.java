@@ -18,6 +18,8 @@ package nl.handypages.trviewer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.google.analytics.tracking.android.EasyTracker;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
@@ -58,7 +60,19 @@ public class ActionDetailActivity extends Activity {
 	    	webviewDetails.loadData(body, "text/html", null);
 	    }
 	}
-	
+
+    @Override
+    public void onStart() {
+      super.onStart();
+      EasyTracker.getInstance().activityStart(this);
+    }
+ 
+    @Override
+    public void onStop() {
+      super.onStop();
+      EasyTracker.getInstance().activityStop(this); 
+    }
+ 
 	private String findPhoneNumber(String str) {
 		String result = null;
 		

@@ -18,6 +18,10 @@ package nl.handypages.trviewer;
 import java.util.ArrayList;
 import java.util.Date;
 
+import com.google.analytics.tracking.android.EasyTracker;
+import com.google.analytics.tracking.android.GoogleAnalytics;
+import com.google.analytics.tracking.android.GoogleAnalytics.AppOptOutCallback;
+
 import nl.handypages.trviewer.dropbox.Dropbox;
 import nl.handypages.trviewer.dropbox.DropboxDownloader;
 import nl.handypages.trviewer.helpers.ActionHelper;
@@ -119,6 +123,7 @@ public class MainActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setDevelopmentSetting();
         synchronized (this) {
         	new Eula(this).show();
 		}
@@ -161,6 +166,49 @@ public class MainActivity extends Activity {
 
 	    // Action states are hard coded in TR; retrieve from Array in R.
         LISTACTIONSTATE = getResources().getStringArray(R.array.action_status);
+    }
+
+    @Override
+    public void onStart() {
+      super.onStart();
+      EasyTracker.getInstance().activityStart(this);
+
+    }
+ 
+    @Override
+    public void onStop() {
+      super.onStop();
+      EasyTracker.getInstance().activityStop(this); 
+    }
+ 
+    /**
+     * Change settings when in development mode. Only works from API Level 17 onwards.
+     * http://stackoverflow.com/questions/13990391/disable-google-analytics-when-in-development
+     */
+    private void setDevelopmentSetting() {
+    	GoogleAnalytics googleAnalytics = GoogleAnalytics.getInstance(getApplicationContext());
+
+    	if(BuildConfig.DEBUG) {
+    		Log.i(MainActivity.TAG,"=== App running in debug mode ===");
+    	    //googleAnalytics.setAppOptOut(true);
+    	    googleAnalytics.setDebug(true);
+    	} else {
+    		Log.i(MainActivity.TAG,"=== App NOT running in debug mode ===");
+    		googleAnalytics.setAppOptOut(false);
+    		googleAnalytics.setDebug(false);
+    	}
+		// Get the app opt out preference using an AppOptOutCallback.
+    	googleAnalytics.requestAppOptOut(new AppOptOutCallback() {
+			@Override
+			public void reportAppOptOut(boolean optOut) {
+				if (optOut) {
+					Log.i(MainActivity.TAG,"Google Analytics state = off.");
+				} else {
+					Log.i(MainActivity.TAG,"Google Analytics state = on.");
+				}
+
+			}
+		});
     }
     
     /**

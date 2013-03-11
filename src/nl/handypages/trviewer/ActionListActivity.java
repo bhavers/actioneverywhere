@@ -22,6 +22,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 
+import com.google.analytics.tracking.android.EasyTracker;
+
 import nl.handypages.trviewer.database.FilterActionDateDbAdapter;
 import nl.handypages.trviewer.helpers.FilterHelper;
 import nl.handypages.trviewer.parser.TRAction;
@@ -69,7 +71,19 @@ public class ActionListActivity extends ListActivity {
 	    super.onCreate(savedInstanceState);
 	    setContentView(R.layout.action_list);
 	}
-	
+
+    @Override
+    public void onStart() {
+      super.onStart();
+      EasyTracker.getInstance().activityStart(this);
+    }
+ 
+    @Override
+    public void onStop() {
+      super.onStop();
+      EasyTracker.getInstance().activityStop(this); 
+    }
+ 
 	@Override
 	protected void onResume() {
 		super.onResume();

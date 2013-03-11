@@ -16,6 +16,10 @@
 package nl.handypages.trviewer;
 import java.util.Calendar;
 
+import com.google.analytics.tracking.android.EasyTracker;
+import com.google.analytics.tracking.android.GoogleAnalytics;
+import com.google.analytics.tracking.android.Tracker;
+
 import nl.handypages.trviewer.parser.TRTopic;
 
 import android.app.Activity;
@@ -41,10 +45,15 @@ public class ThoughtActivity extends Activity {
 	private String strSentFrom;
 	//private String strTopic;
 	
+	private Tracker mGaTracker;
+
+	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-		
+ 
+        mGaTracker = GoogleAnalytics.getInstance(this).getDefaultTracker();
+
         setContentView(R.layout.thought);
         editTextThought = (EditText) findViewById(R.id.editTextThought);
         
@@ -81,7 +90,21 @@ public class ThoughtActivity extends Activity {
         
 
     }
+
+    @Override
+    public void onStart() {
+      super.onStart();
+      EasyTracker.getInstance().activityStart(this);
+    }
+ 
+    @Override
+    public void onStop() {
+      super.onStop();
+      EasyTracker.getInstance().activityStop(this); 
+    }
+ 
     public void send(View view) {
+    	mGaTracker.sendEvent("ui_action", "button_press", "thought_button", null);
 
     	if (MainActivity.prefsEmailForThoughts != "") {
     			String topic = ""; 
@@ -104,6 +127,7 @@ public class ThoughtActivity extends Activity {
 
     }
     public void recordVoice(View view) {
+    	mGaTracker.sendEvent("ui_action", "button_press", "record_voice_button", null);
     	//Toast.makeText(getApplicationContext(), ((TextView) view).getText() + " not yet implemented.", Toast.LENGTH_SHORT).show();
     	startVoiceRecognitionActivity();
     }
