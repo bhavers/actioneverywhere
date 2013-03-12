@@ -18,6 +18,7 @@ package nl.handypages.trviewer;
 import java.util.ArrayList;
 
 import com.google.analytics.tracking.android.EasyTracker;
+import com.google.analytics.tracking.android.Tracker;
 
 import nl.handypages.trviewer.helpers.ActionListHelper;
 import nl.handypages.trviewer.parser.TRActionList;
@@ -39,6 +40,7 @@ public class EditListsActivity extends Activity {
 	private ArrayList<String> customLists;
 	private ListView lv;
 	private ActionListHelper actionListHelper;
+	private Tracker mGaTracker;
 	
 	@Override
     public void onCreate(Bundle savedInstanceState) {
@@ -61,6 +63,7 @@ public class EditListsActivity extends Activity {
     public void onStart() {
       super.onStart();
       EasyTracker.getInstance().activityStart(this);
+      mGaTracker = EasyTracker.getTracker();
     }
  
     @Override
@@ -88,6 +91,7 @@ public class EditListsActivity extends Activity {
 	      * http://bestsiteinthemultiverse.com/2009/12/android-selected-state-listview-example/
 	      * This method is defined in edit_list.xml
 	      */
+		mGaTracker.sendEvent("ui_action", "button_press", "editlist_removelist_try_button", null);
 		int pos = lv.getCheckedItemPosition();
 		if (pos == -1) {
 			// Nothing selected, do not add anything.
@@ -100,10 +104,11 @@ public class EditListsActivity extends Activity {
 		lv.setAdapter(new ArrayAdapter<String>(this, 
 	    		android.R.layout.simple_list_item_multiple_choice, customLists));
 		
+		mGaTracker.sendEvent("ui_action", "button_press", "editlist_removelist_ok_button", null);
 	 }
 
 	public void orderUp(View view) {
-
+		mGaTracker.sendEvent("ui_action", "button_press", "editlist_orderup_try_button", null);
 		int pos = lv.getCheckedItemPosition();
 
 		//Log.i(MainActivity.TAG,"Pos = " + Integer.toString(pos));
@@ -116,10 +121,11 @@ public class EditListsActivity extends Activity {
 		getCustomActionLists();
 		lv.setAdapter(new ArrayAdapter<String>(this, 
 	    		android.R.layout.simple_list_item_multiple_choice, customLists));
+		mGaTracker.sendEvent("ui_action", "button_press", "editlist_orderup_ok_button", null);
 	}
 
 	public void orderDown(View view) {
-		
+		mGaTracker.sendEvent("ui_action", "button_press", "editlist_orderdown_try_button", null);
 		int pos = lv.getCheckedItemPosition();
 		if (pos == -1 || pos == customLists.size() - 1) {
 			// Nothing selected, do not add anything.
@@ -129,6 +135,7 @@ public class EditListsActivity extends Activity {
 		
 		getCustomActionLists();
 		lv.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_multiple_choice, customLists));
+		mGaTracker.sendEvent("ui_action", "button_press", "editlist_orderup_ok_button", null);
 	}
 	
 	public void addList(View view) {
@@ -136,7 +143,7 @@ public class EditListsActivity extends Activity {
 	      * Adds the list to SharedPreferences and refreshes the ListView to display the list.
 	      * This method is defined in edit_list.xml.
 	      */
-
+		mGaTracker.sendEvent("ui_action", "button_press", "editlist_addlist_try_button", null);
 		TextView listToAdd = (TextView)findViewById(R.id.editListEditTextAdd);
 		
 		if (listToAdd.getText().toString().equals("")) {
@@ -162,6 +169,6 @@ public class EditListsActivity extends Activity {
 		
 		listToAdd.setText("");
 		listToAdd.clearFocus();
-		
+		mGaTracker.sendEvent("ui_action", "button_press", "editlist_addlist_ok_button", null);
 	 }
 }

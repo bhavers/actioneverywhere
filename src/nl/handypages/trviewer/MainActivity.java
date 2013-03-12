@@ -20,6 +20,7 @@ import java.util.Date;
 
 import com.google.analytics.tracking.android.EasyTracker;
 import com.google.analytics.tracking.android.GoogleAnalytics;
+import com.google.analytics.tracking.android.Tracker;
 import com.google.analytics.tracking.android.GoogleAnalytics.AppOptOutCallback;
 
 import nl.handypages.trviewer.dropbox.Dropbox;
@@ -116,6 +117,7 @@ public class MainActivity extends Activity {
     private Dialog aboutDialog;
     private TextView tvHelpTitle;
     private TextView tvHelpBody;
+    private Tracker mGaTracker;
 
     public static Dropbox db;
     
@@ -123,7 +125,10 @@ public class MainActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setDevelopmentSetting();
+        //googleAnalytics = GoogleAnalytics.getInstance(getApplicationContext());
+        //mGaTracker = googleAnalytics.getDefaultTracker();
+        //mGaTracker.sendEvent("ui_action", "button_press", "test", null);
+        
         synchronized (this) {
         	new Eula(this).show();
 		}
@@ -172,7 +177,8 @@ public class MainActivity extends Activity {
     public void onStart() {
       super.onStart();
       EasyTracker.getInstance().activityStart(this);
-
+      mGaTracker = EasyTracker.getTracker();
+      setDevelopmentSetting();
     }
  
     @Override
@@ -187,7 +193,6 @@ public class MainActivity extends Activity {
      */
     private void setDevelopmentSetting() {
     	GoogleAnalytics googleAnalytics = GoogleAnalytics.getInstance(getApplicationContext());
-
     	if(BuildConfig.DEBUG) {
     		Log.i(MainActivity.TAG,"=== App running in debug mode ===");
     	    //googleAnalytics.setAppOptOut(true);
@@ -481,28 +486,36 @@ public class MainActivity extends Activity {
 	     inflater.inflate(R.menu.main_menu, menu);
 	     return true;
 	}
+    private void trackBtnPress(String msg) {
+    	mGaTracker.sendEvent("ui_action", "button_press", "main_menu_editlist_button", null);
+    }
 	
     @Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 	    // Handle item selection in the preferences menu
 	    switch (item.getItemId()) {
 	    case R.id.refreshBtn:
+	    	mGaTracker.sendEvent("ui_action", "button_press", "main_menu_download_button", null);
 	    	download();
 	        return true;
 	    case R.id.prefsBtn:
+	    	mGaTracker.sendEvent("ui_action", "button_press", "main_menu_preferences_button", null);
 	    	Intent settingsActivity = new Intent(getBaseContext(), PrefsActivitity.class);
 	    	startActivity(settingsActivity);
 	        return true;
 	    case R.id.editListBtn:
+	    	trackBtnPress("main_menu_editlist_button");
 	    	Intent editListActivity = new Intent(getBaseContext(), EditListsActivity.class);
 	    	startActivity(editListActivity);
 	        return true;
 	    case R.id.helpBtn:
+	    	mGaTracker.sendEvent("ui_action", "button_press", "main_menu_help_button", null);
 	    	showDialog(HELP_DIALOG);
 	    	TextView tvHelpDialog= (TextView) helpDialog.findViewById(android.R.id.message);
 	    	tvHelpDialog.setTextSize(12);
 	    	return true;
 	    case R.id.aboutBtn:
+	    	mGaTracker.sendEvent("ui_action", "button_press", "main_menu_about_button", null);
 	    	showDialog(ABOUT_DIALOG);
 	    	return true;
 	    case R.id.exitBtn:

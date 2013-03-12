@@ -23,6 +23,7 @@ import java.util.Date;
 import java.util.Iterator;
 
 import com.google.analytics.tracking.android.EasyTracker;
+import com.google.analytics.tracking.android.Tracker;
 
 import nl.handypages.trviewer.database.FilterActionDateDbAdapter;
 import nl.handypages.trviewer.helpers.FilterHelper;
@@ -64,6 +65,7 @@ public class ActionListActivity extends ListActivity {
     boolean filterAfterDate;
     boolean filterBeforeDate;
  	Date todayDate;
+ 	private Tracker mGaTracker;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -76,6 +78,7 @@ public class ActionListActivity extends ListActivity {
     public void onStart() {
       super.onStart();
       EasyTracker.getInstance().activityStart(this);
+      mGaTracker = EasyTracker.getTracker();
     }
  
     @Override
@@ -355,6 +358,7 @@ public class ActionListActivity extends ListActivity {
 	    // Handle item selection
 	    switch (item.getItemId()) {
 	    case R.id.filterListBtn:
+	    	mGaTracker.sendEvent("ui_action", "button_press", "actionlist_menu_filter_button", null);
 	    	if (MainActivity.listActionLists.get(actionListPos).getCustom()) {
 	    		Intent filterListActivity = new Intent(getBaseContext(), ActionListFilterActivity.class);
 		    	//Intent filterListActivity = new Intent(getBaseContext(), ActionListFilterPrefsActivitity.class);

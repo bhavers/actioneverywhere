@@ -52,8 +52,6 @@ public class ThoughtActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
  
-        mGaTracker = GoogleAnalytics.getInstance(this).getDefaultTracker();
-
         setContentView(R.layout.thought);
         editTextThought = (EditText) findViewById(R.id.editTextThought);
         
@@ -95,6 +93,7 @@ public class ThoughtActivity extends Activity {
     public void onStart() {
       super.onStart();
       EasyTracker.getInstance().activityStart(this);
+      mGaTracker = EasyTracker.getTracker();
     }
  
     @Override

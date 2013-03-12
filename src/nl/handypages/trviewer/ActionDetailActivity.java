@@ -19,6 +19,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.google.analytics.tracking.android.EasyTracker;
+import com.google.analytics.tracking.android.Tracker;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -38,6 +39,7 @@ public class ActionDetailActivity extends Activity {
 
 	private WebView webviewDetails;
 	private TextView textviewDescription;
+	private Tracker mGaTracker;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -65,6 +67,7 @@ public class ActionDetailActivity extends Activity {
     public void onStart() {
       super.onStart();
       EasyTracker.getInstance().activityStart(this);
+      mGaTracker = EasyTracker.getTracker();
     }
  
     @Override
@@ -94,6 +97,7 @@ public class ActionDetailActivity extends Activity {
 	 * Start dialing a number when Dial button is pressed.
 	 */
 	public void startDialer(View view) {
+		mGaTracker.sendEvent("ui_action", "button_press", "actiondetails_dial_button", null);
 		String phoneNumber = findPhoneNumber((String)textviewDescription.getText());
         
 
