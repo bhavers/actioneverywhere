@@ -10,10 +10,8 @@
     It has been designed to work with Thinking Rock 3.4.2; it might work with earlier versions.</string>
     <string name="updates">
 	Updates in this version:\n
-	- Setup automated test framework to improve code quality\n
-	- Included Google Analytics for usage analysis\n
-	- Included a privacy policy in Help and on actioneverywhere.com\n
-	- \n\n
+	- Now using an automated test framework to improve app release quality\n
+	- Included Google Analytics and a privacy policy\n\n
 	</string>
     
     <string name="textViewPhoneTitle">Action list</string>

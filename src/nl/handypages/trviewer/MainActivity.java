@@ -199,7 +199,7 @@ public class MainActivity extends Activity {
     	    googleAnalytics.setDebug(true);
     	} else {
     		Log.i(MainActivity.TAG,"=== App NOT running in debug mode ===");
-    		googleAnalytics.setAppOptOut(false);
+    		//googleAnalytics.setAppOptOut(false);
     		googleAnalytics.setDebug(false);
     	}
 		// Get the app opt out preference using an AppOptOutCallback.
